@@ -89,15 +89,6 @@ const App = (() => {
     updateGreeting();
     updateThermometerHome();
     renderPegadinhas();
-
-    // Mostra o desafio interativo na primeira vez que o usuário entra
-    if (!state.desafioShown) {
-      setTimeout(() => {
-        showOverlay('overlay-desafio');
-        state.desafioShown = true;
-        saveState();
-      }, 1200);
-    }
   }
 
   function checkDailyReset() {
@@ -291,7 +282,6 @@ const App = (() => {
 
   function startSimuladoFromDesafio() {
     hideAllOverlays();
-    startSimulado();
   }
 
   function dismissDesafio() {
@@ -333,17 +323,12 @@ const App = (() => {
     const textEl = document.getElementById('question-text');
     if (textEl) textEl.textContent = q.text;
 
-    // Imagem se houver
-    const imgWrap = document.getElementById('question-img-wrap');
-    const img = document.getElementById('question-img');
-    if (imgWrap && img) {
-      if (q.image) {
-        img.src = q.image;
-        imgWrap.style.display = 'flex';
-      } else {
-        imgWrap.style.display = 'none';
-        img.src = '';
-      }
+    // A imagem fica oculta antes do usuário responder para não dar spoiler
+    const fbImgWrap = document.getElementById('feedback-img-wrap');
+    if (fbImgWrap) {
+      fbImgWrap.style.display = 'none';
+      const fbImg = document.getElementById('feedback-img');
+      if (fbImg) fbImg.src = '';
     }
 
     // Sequência atual
@@ -500,13 +485,25 @@ const App = (() => {
 
     const textEl = document.getElementById('feedback-text');
     if (textEl) {
-      // Formatação rica da explicação
       let expl = q.explanation || '';
       textEl.innerHTML = `
         <div class="feedback-explanation">
           <p>${expl}</p>
         </div>
       `;
+    }
+
+    // 📸 REVELA A IMAGEM DE REFERÊNCIA APENAS DEPOIS QUE O USUÁRIO RESPONDE
+    const fbImgWrap = document.getElementById('feedback-img-wrap');
+    const fbImg = document.getElementById('feedback-img');
+    if (fbImgWrap && fbImg) {
+      if (q.image) {
+        fbImg.src = q.image;
+        fbImgWrap.style.display = 'flex';
+      } else {
+        fbImgWrap.style.display = 'none';
+        fbImg.src = '';
+      }
     }
 
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
