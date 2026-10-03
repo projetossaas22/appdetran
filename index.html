@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TreinaDETRAN — Não estude. Treine.</title>
-  <meta name="description" content="App de treino inteligente para a prova teórica do DETRAN. Questões por tema, feedback imediato, XP, vidas e simulado final." />
+  <title>DetranQuiz — Método Gabarita Detran</title>
+  <meta name="description" content="Não estude para a prova do DETRAN. Treine para ela. Quiz interativo com 52 questões, simulados, pegadinhas e feedback imediato. Método Gabarita Detran." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -18,17 +18,21 @@
       <div class="road-lines"></div>
       <div class="particles" id="particles"></div>
     </div>
+
     <div class="splash-content">
+      <div class="splash-brand">Método Gabarita Detran</div>
       <div class="logo-badge">🚗</div>
-      <h1 class="splash-title">TreinaDETRAN</h1>
-      <p class="splash-tagline">"Não estude para a prova.<br/><strong>Treine para ela.</strong>"</p>
-      <p class="splash-sub">Treino Inteligente por Quiz — aprenda respondendo, corrija na hora e descubra onde você ainda erra.</p>
+      <h1 class="splash-title">DetranQuiz</h1>
+      <p class="splash-tagline">Não estude para a prova.<br/><strong>TREINE para ela.</strong></p>
+      <p class="splash-sub">Quiz interativo com as questões mais cobradas na prova do DETRAN. Responda, descubra onde erra e chegue aprovada.</p>
       <button class="btn-primary btn-xl pulse" id="btn-start" onclick="App.showScreen('screen-home')">
-        Começar Agora 🚀
+        Começar Agora — Grátis 🚀
       </button>
+      <div class="splash-price-hint">Acesso completo por apenas <strong>R$ 20</strong> — pagamento único</div>
     </div>
+
     <div class="splash-stats">
-      <div class="stat-item"><span class="stat-number">30</span><span class="stat-label">Questões na prova</span></div>
+      <div class="stat-item"><span class="stat-number">52</span><span class="stat-label">Questões no quiz</span></div>
       <div class="stat-item"><span class="stat-number">70%</span><span class="stat-label">Para passar</span></div>
       <div class="stat-item"><span class="stat-number">6</span><span class="stat-label">Módulos de treino</span></div>
     </div>
@@ -39,14 +43,17 @@
     <header class="app-header">
       <div class="header-left">
         <span class="app-logo">🚗</span>
-        <span class="app-name">TreinaDETRAN</span>
+        <div>
+          <span class="app-name">DetranQuiz</span>
+          <span class="app-sub-brand">Método Gabarita Detran</span>
+        </div>
       </div>
       <div class="header-right">
-        <div class="xp-badge" id="header-xp">
+        <div class="xp-badge">
           <span class="xp-icon">⚡</span>
           <span id="total-xp-display">0 XP</span>
         </div>
-        <div class="streak-badge" id="header-streak">
+        <div class="streak-badge">
           <span>🔥</span>
           <span id="streak-display">0</span>
         </div>
@@ -70,6 +77,18 @@
         </div>
       </div>
 
+      <!-- Thermometer Banner -->
+      <div class="thermometer-card" id="thermometer-card" onclick="App.startSimulado()">
+        <div class="thermo-left">
+          <div class="thermo-icon">🌡️</div>
+          <div>
+            <div class="thermo-title">Termômetro da Prova</div>
+            <div class="thermo-sub">Faça as 52 questões e descubra<br>quantas você já acerta!</div>
+          </div>
+        </div>
+        <div class="thermo-score" id="thermo-score-home">—/52</div>
+      </div>
+
       <!-- Weak Areas Alert -->
       <div class="weak-alert" id="weak-alert" style="display:none">
         <span class="weak-icon">⚠️</span>
@@ -80,17 +99,15 @@
       </div>
 
       <!-- Modules Grid -->
-      <h3 class="section-title">📚 Módulos de Treino</h3>
-      <div class="modules-grid" id="modules-grid">
-        <!-- Gerado via JS -->
-      </div>
+      <h3 class="section-title">📚 Treinar por Módulo</h3>
+      <div class="modules-grid" id="modules-grid"></div>
 
-      <!-- Simulado Final -->
+      <!-- Simulado Card -->
       <div class="simulado-card" onclick="App.startSimulado()">
         <div class="simulado-icon">📋</div>
         <div class="simulado-info">
-          <h3>Simulado Final</h3>
-          <p>30 questões • Todas as matérias • Tempo livre</p>
+          <h3>Quiz Completo — 52 Questões</h3>
+          <p>Todas as matérias • Descubra sua nota no termômetro</p>
         </div>
         <div class="simulado-arrow">→</div>
       </div>
@@ -103,21 +120,18 @@
       <button class="nav-btn" onclick="App.showTab('stats')" id="nav-stats">
         <span>📊</span><span>Progresso</span>
       </button>
-      <button class="nav-btn" onclick="App.showTab('rank')" id="nav-rank">
-        <span>🏆</span><span>Ranking</span>
+      <button class="nav-btn" onclick="App.showTab('pegadinhas')" id="nav-peg">
+        <span>🪤</span><span>Pegadinhas</span>
       </button>
     </nav>
   </div>
 
   <!-- ══ TELA 3: QUIZ ══ -->
   <div id="screen-quiz" class="screen">
-    <!-- Quiz Header -->
     <div class="quiz-header">
       <button class="btn-back" id="btn-back-quiz" onclick="App.exitQuiz()">✕</button>
       <div class="quiz-module-name" id="quiz-module-name">Legislação</div>
-      <div class="lives-display" id="lives-display">
-        <!-- corações gerados via JS -->
-      </div>
+      <div class="lives-display" id="lives-display"></div>
     </div>
 
     <!-- Progress Bar -->
@@ -128,14 +142,14 @@
       <span class="quiz-progress-text" id="quiz-progress-text">0/10</span>
     </div>
 
-    <!-- XP Streak Bar -->
-    <div class="streak-bar" id="streak-bar">
+    <!-- Streak Bar -->
+    <div class="streak-bar">
       <span class="streak-label">🔥 Sequência:</span>
       <span class="streak-count" id="current-streak">0</span>
     </div>
 
     <!-- Question Card -->
-    <div class="quiz-body">
+    <div class="quiz-body" id="quiz-body">
       <div class="question-card" id="question-card">
         <div class="question-number" id="question-number">Questão 1</div>
         <div class="question-tag" id="question-tag">Legislação</div>
@@ -145,12 +159,8 @@
         </div>
       </div>
 
-      <!-- Options -->
-      <div class="options-list" id="options-list">
-        <!-- Gerado via JS -->
-      </div>
+      <div class="options-list" id="options-list"></div>
 
-      <!-- Feedback -->
       <div class="feedback-panel" id="feedback-panel" style="display:none">
         <div class="feedback-icon" id="feedback-icon">✅</div>
         <div class="feedback-content">
@@ -168,8 +178,24 @@
   <div id="screen-result" class="screen">
     <div class="result-content">
       <div class="result-emoji" id="result-emoji">🎉</div>
-      <h2 class="result-title" id="result-title">Módulo Concluído!</h2>
-      <p class="result-subtitle" id="result-subtitle">Você foi bem!</p>
+      <h2 class="result-title" id="result-title">Concluído!</h2>
+      <p class="result-subtitle" id="result-subtitle">Veja seu resultado</p>
+
+      <!-- Termômetro (só no simulado) -->
+      <div class="thermo-result-card" id="thermo-result-card" style="display:none">
+        <div class="thermo-result-label">🌡️ Termômetro da Prova</div>
+        <div class="thermo-result-score" id="thermo-result-score">0/52</div>
+        <div class="thermo-result-msg" id="thermo-result-msg"></div>
+        <div class="thermo-bar-track">
+          <div class="thermo-bar-fill" id="thermo-bar-fill"></div>
+          <div class="thermo-marker" style="left:57.6%"><span>30</span></div>
+          <div class="thermo-marker" style="left:76.9%"><span>40</span></div>
+          <div class="thermo-marker" style="left:86.5%"><span>45</span></div>
+        </div>
+        <div class="thermo-labels">
+          <span>0</span><span>30 → 60%</span><span>40 → 80%</span><span>45 → 95%</span><span>52</span>
+        </div>
+      </div>
 
       <div class="result-stats-grid">
         <div class="result-stat">
@@ -190,26 +216,26 @@
         </div>
       </div>
 
-      <!-- Stars -->
-      <div class="stars-display" id="stars-display">
+      <div class="stars-display">
         <span class="star" id="star1">⭐</span>
         <span class="star" id="star2">⭐</span>
         <span class="star" id="star3">⭐</span>
       </div>
 
-      <!-- XP Bar Animation -->
-      <div class="xp-bar-wrap">
-        <span class="xp-bar-label">XP Total</span>
-        <div class="xp-bar-track">
-          <div class="xp-bar-fill" id="xp-bar-result"></div>
-        </div>
-        <span class="xp-bar-val" id="xp-val-result">0 XP</span>
-      </div>
-
-      <!-- Wrong answers review -->
+      <!-- Wrong review -->
       <div class="wrong-review" id="wrong-review" style="display:none">
         <h4>📌 O que você errou — revise agora:</h4>
         <div id="wrong-list"></div>
+      </div>
+
+      <!-- CTA de compra se ainda não comprou -->
+      <div class="buy-cta" id="buy-cta">
+        <div class="buy-cta-text">
+          <strong>Acesse simulados completos, pegadinhas comentadas e materiais de revisão</strong>
+        </div>
+        <a href="https://wa.me" class="btn-whatsapp" id="btn-whatsapp" target="_blank">
+          💬 Quero o Método Gabarita Detran — R$ 20
+        </a>
       </div>
 
       <div class="result-actions">
@@ -252,25 +278,54 @@
       </div>
 
       <h3 class="section-title">📈 Desempenho por Módulo</h3>
-      <div class="module-stats-list" id="module-stats-list">
-        <!-- Gerado via JS -->
-      </div>
+      <div class="module-stats-list" id="module-stats-list"></div>
 
       <h3 class="section-title">🎯 Pontos Fracos — Foque Aqui!</h3>
-      <div class="weak-areas-list" id="weak-areas-list">
-        <!-- Gerado via JS -->
+      <div class="weak-areas-list" id="weak-areas-list"></div>
+
+      <div class="buy-cta" style="margin-top:8px">
+        <div class="buy-cta-text">
+          <strong>Quer simulados, pegadinhas e materiais organizados por assunto?</strong>
+        </div>
+        <a href="https://wa.me" class="btn-whatsapp" target="_blank">
+          💬 Método Gabarita Detran — R$ 20
+        </a>
       </div>
     </div>
     <nav class="bottom-nav">
-      <button class="nav-btn" onclick="App.showTab('home')" id="nav-home-s">
-        <span>🏠</span><span>Início</span>
-      </button>
-      <button class="nav-btn active" onclick="App.showTab('stats')" id="nav-stats-s">
-        <span>📊</span><span>Progresso</span>
-      </button>
-      <button class="nav-btn" onclick="App.showTab('rank')" id="nav-rank-s">
-        <span>🏆</span><span>Ranking</span>
-      </button>
+      <button class="nav-btn" onclick="App.showTab('home')"><span>🏠</span><span>Início</span></button>
+      <button class="nav-btn active" onclick="App.showTab('stats')"><span>📊</span><span>Progresso</span></button>
+      <button class="nav-btn" onclick="App.showTab('pegadinhas')"><span>🪤</span><span>Pegadinhas</span></button>
+    </nav>
+  </div>
+
+  <!-- ══ TELA 6: PEGADINHAS ══ -->
+  <div id="screen-pegadinhas" class="screen" style="display:none">
+    <header class="app-header">
+      <div class="header-left">
+        <span class="app-logo">🪤</span>
+        <span class="app-name">Pegadinhas da Prova</span>
+      </div>
+    </header>
+    <div class="peg-content">
+      <div class="peg-intro">
+        <p>As questões que mais <strong>confundem candidatos</strong> na prova real. Estude com atenção!</p>
+      </div>
+      <div class="peg-list" id="peg-list"></div>
+
+      <div class="buy-cta" style="margin-top:8px">
+        <div class="buy-cta-text">
+          <strong>Mais de 20 pegadinhas comentadas com explicação completa estão no Método Gabarita Detran</strong>
+        </div>
+        <a href="https://wa.me" class="btn-whatsapp" target="_blank">
+          💬 Quero todas as pegadinhas — R$ 20
+        </a>
+      </div>
+    </div>
+    <nav class="bottom-nav">
+      <button class="nav-btn" onclick="App.showTab('home')"><span>🏠</span><span>Início</span></button>
+      <button class="nav-btn" onclick="App.showTab('stats')"><span>📊</span><span>Progresso</span></button>
+      <button class="nav-btn active" onclick="App.showTab('pegadinhas')"><span>🪤</span><span>Pegadinhas</span></button>
     </nav>
   </div>
 
@@ -289,9 +344,25 @@
   <div id="overlay-levelup" class="overlay" style="display:none">
     <div class="overlay-card levelup-card">
       <div class="overlay-icon levelup-anim">🏆</div>
-      <h3>Nível Desbloqueado!</h3>
-      <p id="levelup-text">Você completou este módulo com maestria!</p>
+      <h3>Módulo Desbloqueado!</h3>
+      <p id="levelup-text">Você completou este módulo!</p>
       <button class="btn-primary" onclick="App.closeLevelUp()">Continuar 🚀</button>
+    </div>
+  </div>
+
+  <!-- ══ OVERLAY: DESAFIO ══ -->
+  <div id="overlay-desafio" class="overlay" style="display:none">
+    <div class="overlay-card desafio-card">
+      <div class="overlay-icon">🎯</div>
+      <h3>Aceita o desafio?</h3>
+      <p>Quantas das <strong>52 questões</strong> você consegue acertar sem consultar nenhuma apostila?</p>
+      <div class="desafio-options">
+        <div class="desafio-opt" onclick="App.dismissDesafio()">Menos de 30</div>
+        <div class="desafio-opt" onclick="App.dismissDesafio()">Entre 30 e 40</div>
+        <div class="desafio-opt" onclick="App.dismissDesafio()">Entre 40 e 45</div>
+        <div class="desafio-opt highlight" onclick="App.dismissDesafio()">As 52! 💪</div>
+      </div>
+      <button class="btn-primary" onclick="App.startSimuladoFromDesafio()">Descobrir agora →</button>
     </div>
   </div>
 
