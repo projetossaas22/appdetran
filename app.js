@@ -7,13 +7,15 @@
 const App = (() => {
   'use strict';
 
-  // ══ STATE ══════════════════════════════════════════
+  // ══ CONSTANTES ══════════════════════════════════════
   const MAX_LIVES = 5;
   const QUESTIONS_PER_MODULE = 10;
+  const SIMULADO_QUESTIONS_COUNT = 52;
   const XP_CORRECT = 10;
   const XP_STREAK_BONUS = [0, 0, 5, 10, 15, 20];
-  const WHATSAPP_URL = 'https://wa.me'; // ← substitua pelo link real do WhatsApp
+  const WHATSAPP_URL = 'https://wa.me'; // ← Substitua pelo seu link do WhatsApp / checkout
 
+  // ══ ESTADO GLOBAL ═══════════════════════════════════
   let state = {
     xp: 0,
     streak: 0,
@@ -25,7 +27,7 @@ const App = (() => {
     moduleStats: {},
     completedModules: new Set(),
     lastPlayed: null,
-    bestSimuladoScore: 0,  // melhor pontuação no quiz de 52
+    bestSimuladoScore: 0,
     desafioShown: false,
   };
 
@@ -42,13 +44,17 @@ const App = (() => {
     sessionStreak: 0,
   };
 
-  // ══ STORAGE ════════════════════════════════════════
+  // ══ ARMAZENAMENTO LOCAL ═════════════════════════════
   function saveState() {
-    const toSave = {
-      ...state,
-      completedModules: [...state.completedModules]
-    };
-    localStorage.setItem('treina_detran_state', JSON.stringify(toSave));
+    try {
+      const toSave = {
+        ...state,
+        completedModules: [...state.completedModules],
+      };
+      localStorage.setItem('treina_detran_state', JSON.stringify(toSave));
+    } catch (e) {
+      console.warn('Erro ao salvar state:', e);
+    }
   }
 
   function loadState() {
@@ -59,14 +65,14 @@ const App = (() => {
       state = {
         ...state,
         ...saved,
-        completedModules: new Set(saved.completedModules || [])
+        completedModules: new Set(saved.completedModules || []),
       };
     } catch (e) {
       console.warn('Erro ao carregar state:', e);
     }
   }
 
-  // ══ INIT ═══════════════════════════════════════════
+  // ══ INICIALIZAÇÃO ═══════════════════════════════════
   function init() {
     loadState();
     checkDailyReset();
@@ -83,10 +89,10 @@ const App = (() => {
     // Mostra o desafio na primeira vez que o usuário entra na home
     if (!state.desafioShown) {
       setTimeout(() => {
-        document.getElementById('overlay-desafio').style.display = 'flex';
+        showOverlay('overlay-desafio');
         state.desafioShown = true;
         saveState();
-      }, 1200);
+      }, 1400);
     }
   }
 
@@ -102,17 +108,18 @@ const App = (() => {
   function createParticles() {
     const container = document.getElementById('particles');
     if (!container) return;
+    container.innerHTML = '';
     for (let i = 0; i < 20; i++) {
       const p = document.createElement('div');
       p.className = 'particle';
-      const size = Math.random() * 6 + 2;
+      const size = Math.random() * 5 + 3;
       p.style.cssText = `
         width: ${size}px; height: ${size}px;
         left: ${Math.random() * 100}%;
         bottom: -10px;
         animation-duration: ${Math.random() * 8 + 6}s;
-        animation-delay: ${Math.random() * 5}s;
-        opacity: ${Math.random() * 0.5};
+        animation-delay: ${Math.random() * 4}s;
+        opacity: ${Math.random() * 0.4 + 0.1};
       `;
       container.appendChild(p);
     }
@@ -132,7 +139,7 @@ const App = (() => {
     const sub = document.getElementById('greeting-sub');
     if (sub) {
       sub.textContent = weakTopics.length > 0
-        ? `Você tem pontos fracos para melhorar!`
+        ? 'Você tem pontos fracos para revisar antes da prova!'
         : 'Treine, descubra onde erra e chegue aprovada.';
     }
   }
@@ -152,10 +159,10 @@ const App = (() => {
     }
   }
 
-  // ══ RENDER MODULES ═════════════════════════════════
+  // ══ RENDERIZAÇÃO DOS MÓDULOS ════════════════════════
   function renderModulesGrid() {
     const grid = document.getElementById('modules-grid');
-    if (!grid) return;
+    if (!grid || typeof MODULES === 'undefined') return;
     grid.innerHTML = '';
 
     MODULES.forEach(mod => {
@@ -163,7 +170,7 @@ const App = (() => {
       const total = stats.correct + stats.wrong;
       const pct = total > 0 ? Math.round((stats.correct / total) * 100) : 0;
       const isCompleted = state.completedModules.has(mod.id);
-      const isWeak = pct < 60 && total > 0;
+      const isWeak = pct < 60 && total >= 3;
 
       const card = document.createElement('div');
       card.className = 'module-card';
@@ -171,18 +178,29 @@ const App = (() => {
       card.onclick = () => startModule(mod.id);
 
       let badge = '';
-      if (isWeak) badge = `<div class="module-badge" style="background:#FFD700;color:#000">REVISAR</div>`;
-      else if (isCompleted) badge = `<div class="module-badge" style="background:#22D45A">✓ OK</div>`;
+      if (isWeak) badge = `<div class="module-badge" style="background:#FF4545;color:#fff">REVISAR</div>`;
+      else if (isCompleted) badge = `<div class="module-badge" style="background:#22D45A;color:#000">✓ OK</div>`;
 
       const stars = getModuleStars(pct);
       const starHtml = stars > 0 ? `<div class="module-stars">${'⭐'.repeat(stars)}</div>` : '';
 
+      const iconMarkup = mod.iconImg
+        ? `<div class="module-icon-wrap">
+             <img src="${mod.iconImg}" alt="${mod.name}" class="module-icon-img" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';" />
+             <span class="module-icon" style="display:none">${mod.icon}</span>
+           </div>`
+        : `<span class="module-icon">${mod.icon}</span>`;
+
+      const qCount = (typeof QUESTIONS !== 'undefined' && QUESTIONS[mod.id])
+        ? QUESTIONS[mod.id].length
+        : 10;
+
       card.innerHTML = `
         ${badge}
         ${starHtml}
-        <span class="module-icon">${mod.icon}</span>
+        ${iconMarkup}
         <div class="module-name">${mod.name}</div>
-        <div class="module-questions">${QUESTIONS[mod.id].length} questões</div>
+        <div class="module-questions">${qCount} questões</div>
         <div class="module-progress">
           <div class="module-prog-bar">
             <div class="module-prog-fill" style="width:${pct}%;background:${mod.color}"></div>
@@ -190,14 +208,7 @@ const App = (() => {
           <div class="module-prog-text">${total > 0 ? pct + '% de acerto' : 'Não iniciado'}</div>
         </div>
       `;
-      card.querySelector('.module-card, .module-prog-bar')?.setAttribute('style', `--mod-color:${mod.color}`);
       grid.appendChild(card);
-
-      // Animated bar
-      requestAnimationFrame(() => {
-        const fill = card.querySelector('.module-prog-fill');
-        if (fill) fill.style.width = pct + '%';
-      });
     });
   }
 
@@ -208,10 +219,11 @@ const App = (() => {
     return 0;
   }
 
-  // ══ START MODULE ═══════════════════════════════════
+  // ══ INICIAR TREINO / SIMULADO ═══════════════════════
   function startModule(moduleId) {
+    if (typeof MODULES === 'undefined' || typeof QUESTIONS === 'undefined') return;
     const mod = MODULES.find(m => m.id === moduleId);
-    if (!mod) return;
+    if (!mod || !QUESTIONS[moduleId]) return;
 
     const allQ = QUESTIONS[moduleId];
     const shuffled = shuffle([...allQ]).slice(0, QUESTIONS_PER_MODULE);
@@ -229,21 +241,26 @@ const App = (() => {
       sessionStreak: 0,
     };
 
-    document.getElementById('quiz-module-name').textContent = mod.name;
+    const modNameEl = document.getElementById('quiz-module-name');
+    if (modNameEl) modNameEl.textContent = mod.name;
+
     renderLives();
     renderQuestion();
     showScreen('screen-quiz');
   }
 
   function startSimulado() {
+    if (typeof QUESTIONS === 'undefined') return;
+
     // Coleta questões de todos os módulos
     let all = [];
     Object.keys(QUESTIONS).forEach(moduleId => {
-      const q = QUESTIONS[moduleId].map(q => ({ ...q, moduleId }));
+      const q = QUESTIONS[moduleId].map(item => ({ ...item, moduleId }));
       all = all.concat(q);
     });
 
-    const shuffled = shuffle(all).slice(0, SIMULADO_QUESTIONS_COUNT);
+    const targetCount = Math.min(SIMULADO_QUESTIONS_COUNT, all.length);
+    const shuffled = shuffle(all).slice(0, targetCount);
 
     quizState = {
       moduleId: 'simulado',
@@ -258,13 +275,24 @@ const App = (() => {
       sessionStreak: 0,
     };
 
-    document.getElementById('quiz-module-name').textContent = 'Simulado Final';
+    const modNameEl = document.getElementById('quiz-module-name');
+    if (modNameEl) modNameEl.textContent = 'Simulado Termômetro (52 Q)';
+
     renderLives();
     renderQuestion();
     showScreen('screen-quiz');
   }
 
-  // ══ QUIZ LOGIC ═════════════════════════════════════
+  function startSimuladoFromDesafio() {
+    hideAllOverlays();
+    startSimulado();
+  }
+
+  function dismissDesafio() {
+    hideAllOverlays();
+  }
+
+  // ══ RENDERIZAÇÃO DA QUESTÃO ═════════════════════════
   function renderQuestion() {
     const { questions, currentIndex } = quizState;
     if (currentIndex >= questions.length) {
@@ -275,35 +303,50 @@ const App = (() => {
     const q = questions[currentIndex];
     const total = questions.length;
 
-    // Progress
-    const pct = (currentIndex / total) * 100;
-    document.getElementById('quiz-progress-fill').style.width = pct + '%';
-    document.getElementById('quiz-progress-text').textContent = `${currentIndex}/${total}`;
-    document.getElementById('question-number').textContent = `Questão ${currentIndex + 1}`;
+    // Barra de progresso do quiz
+    const pct = Math.round((currentIndex / total) * 100);
+    const fillEl = document.getElementById('quiz-progress-fill');
+    if (fillEl) fillEl.style.width = pct + '%';
 
-    // Module tag
+    const progTextEl = document.getElementById('quiz-progress-text');
+    if (progTextEl) progTextEl.textContent = `${currentIndex + 1}/${total}`;
+
+    const numEl = document.getElementById('question-number');
+    if (numEl) numEl.textContent = `Questão ${currentIndex + 1}`;
+
+    // Tag do módulo
     const modId = q.moduleId || quizState.moduleId;
-    const mod = MODULES.find(m => m.id === modId);
-    document.getElementById('question-tag').textContent = mod ? mod.name : '';
-    document.getElementById('question-tag').style.setProperty('--tag-color', mod ? mod.color : 'var(--primary)');
-
-    document.getElementById('question-text').textContent = q.text;
-
-    // Image if any
-    const imgWrap = document.getElementById('question-img-wrap');
-    const img = document.getElementById('question-img');
-    if (q.image) {
-      img.src = q.image;
-      imgWrap.style.display = 'block';
-    } else {
-      imgWrap.style.display = 'none';
+    const mod = (typeof MODULES !== 'undefined') ? MODULES.find(m => m.id === modId) : null;
+    const tagEl = document.getElementById('question-tag');
+    if (tagEl) {
+      tagEl.textContent = mod ? mod.name : 'Simulado DETRAN';
+      tagEl.style.setProperty('--tag-color', mod ? mod.color : 'var(--primary)');
     }
 
-    // Streak
-    document.getElementById('current-streak').textContent = quizState.sessionStreak;
+    // Texto da questão
+    const textEl = document.getElementById('question-text');
+    if (textEl) textEl.textContent = q.text;
 
-    // Options
+    // Imagem se houver
+    const imgWrap = document.getElementById('question-img-wrap');
+    const img = document.getElementById('question-img');
+    if (imgWrap && img) {
+      if (q.image) {
+        img.src = q.image;
+        imgWrap.style.display = 'block';
+      } else {
+        imgWrap.style.display = 'none';
+        img.src = '';
+      }
+    }
+
+    // Sequência atual
+    const streakEl = document.getElementById('current-streak');
+    if (streakEl) streakEl.textContent = quizState.sessionStreak;
+
+    // Lista de opções
     const optList = document.getElementById('options-list');
+    if (!optList) return;
     optList.innerHTML = '';
     quizState.answered = false;
 
@@ -320,18 +363,27 @@ const App = (() => {
       optList.appendChild(btn);
     });
 
-    // Hide feedback
+    // Oculta painel de feedback
     const fp = document.getElementById('feedback-panel');
-    fp.style.display = 'none';
-    fp.className = 'feedback-panel';
+    if (fp) {
+      fp.style.display = 'none';
+      fp.className = 'feedback-panel';
+    }
 
-    // Card animation
+    // Animação suave do card da questão
     const card = document.getElementById('question-card');
-    card.style.animation = 'none';
-    void card.offsetWidth;
-    card.style.animation = '';
+    if (card) {
+      card.style.animation = 'none';
+      void card.offsetWidth;
+      card.style.animation = 'fadeIn 0.25s ease';
+    }
+
+    // Rola o quiz para o topo ao mudar de questão
+    const quizBody = document.getElementById('quiz-body');
+    if (quizBody) quizBody.scrollTop = 0;
   }
 
+  // ══ SELEÇÃO DE RESPOSTA ═════════════════════════════
   function selectAnswer(selectedIndex, q) {
     if (quizState.answered) return;
     quizState.answered = true;
@@ -339,22 +391,23 @@ const App = (() => {
     const isCorrect = selectedIndex === q.correct;
     const buttons = document.querySelectorAll('.option-btn');
 
-    buttons.forEach(btn => btn.disabled = true);
+    buttons.forEach(btn => (btn.disabled = true));
 
-    // Visual feedback on options
-    buttons[selectedIndex].classList.add(isCorrect ? 'correct' : 'wrong');
-    if (!isCorrect) {
+    // Estilos visuais de acerto / erro
+    if (buttons[selectedIndex]) {
+      buttons[selectedIndex].classList.add(isCorrect ? 'correct' : 'wrong');
+    }
+    if (!isCorrect && buttons[q.correct]) {
       buttons[q.correct].classList.add('correct');
     }
 
-    // Update stats
+    // Atualização das métricas
     if (isCorrect) {
       quizState.correct++;
       quizState.sessionStreak++;
       state.streak = Math.max(state.streak, quizState.sessionStreak);
       state.bestStreak = Math.max(state.bestStreak, quizState.sessionStreak);
 
-      // XP
       const bonusIdx = Math.min(quizState.sessionStreak, XP_STREAK_BONUS.length - 1);
       const xpEarned = XP_CORRECT + XP_STREAK_BONUS[bonusIdx];
       state.xp += xpEarned;
@@ -364,12 +417,11 @@ const App = (() => {
       quizState.sessionStreak = 0;
       quizState.lives--;
 
-      // Track wrong for weak areas
       quizState.wrongItems.push({
         question: q.text,
         yourAnswer: q.options[selectedIndex],
         correctAnswer: q.options[q.correct],
-        moduleId: q.moduleId || quizState.moduleId
+        moduleId: q.moduleId || quizState.moduleId,
       });
     }
 
@@ -377,9 +429,9 @@ const App = (() => {
     state.totalCorrect += isCorrect ? 1 : 0;
     state.dailyAnswered++;
 
-    // Module stats
+    // Estatísticas por módulo
     const mid = q.moduleId || quizState.moduleId;
-    if (mid !== 'simulado') {
+    if (mid && mid !== 'simulado') {
       if (!state.moduleStats[mid]) state.moduleStats[mid] = { correct: 0, wrong: 0, attempts: 0 };
       state.moduleStats[mid].attempts++;
       if (isCorrect) state.moduleStats[mid].correct++;
@@ -390,28 +442,34 @@ const App = (() => {
     updateHeaderStats();
     updateDailyGoal();
     renderLives();
-
-    // Feedback panel
     showFeedback(isCorrect, q);
 
-    // Game over?
+    // Se acabou as vidas
     if (quizState.lives <= 0 && !isCorrect) {
       setTimeout(() => {
         showGameOver();
-      }, 2000);
+      }, 1600);
     }
   }
 
   function showFeedback(isCorrect, q) {
     const panel = document.getElementById('feedback-panel');
+    if (!panel) return;
+
     panel.className = 'feedback-panel ' + (isCorrect ? 'is-correct' : 'is-wrong');
     panel.style.display = 'flex';
 
-    document.getElementById('feedback-icon').textContent = isCorrect ? '✅' : '❌';
-    document.getElementById('feedback-title').textContent = isCorrect
-      ? getCorrectMessage()
-      : 'Resposta incorreta';
-    document.getElementById('feedback-text').textContent = q.explanation;
+    const iconEl = document.getElementById('feedback-icon');
+    if (iconEl) iconEl.textContent = isCorrect ? '✅' : '❌';
+
+    const titleEl = document.getElementById('feedback-title');
+    if (titleEl) titleEl.textContent = isCorrect ? getCorrectMessage() : 'Resposta incorreta';
+
+    const textEl = document.getElementById('feedback-text');
+    if (textEl) textEl.textContent = q.explanation;
+
+    // Rola até o feedback para garantir visibilidade no celular
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function getCorrectMessage() {
@@ -420,13 +478,17 @@ const App = (() => {
       'Boa! Você acertou! 🚀',
       'Perfeito! 💪',
       'Excelente! ⭐',
-      'Isso aí! Continue! 🔥',
-      'Mandou bem! 🏆'
+      'Isso aí! Continue assim! 🔥',
+      'Mandou muito bem! 🏆',
     ];
     return msgs[Math.floor(Math.random() * msgs.length)];
   }
 
   function nextQuestion() {
+    if (quizState.lives <= 0) {
+      showGameOver();
+      return;
+    }
     quizState.currentIndex++;
     renderQuestion();
   }
@@ -437,11 +499,8 @@ const App = (() => {
     container.innerHTML = '';
     for (let i = 0; i < MAX_LIVES; i++) {
       const heart = document.createElement('span');
+      heart.className = 'heart-icon';
       heart.textContent = i < quizState.lives ? '❤️' : '🖤';
-      heart.style.transition = 'transform 0.2s ease';
-      if (i === quizState.lives && quizState.lives < MAX_LIVES) {
-        heart.style.animation = 'wrongShake 0.4s ease';
-      }
       container.appendChild(heart);
     }
   }
@@ -451,214 +510,145 @@ const App = (() => {
     popup.className = 'xp-popup';
     popup.textContent = streak >= 3 ? `+${xp} XP 🔥` : `+${xp} XP`;
 
-    const rect = document.getElementById('quiz-body')?.getBoundingClientRect() || { left: 200, top: 400 };
-    popup.style.left = (rect.left + rect.width / 2 - 30) + 'px';
-    popup.style.top = (rect.top + 100) + 'px';
+    const quizBody = document.getElementById('quiz-body');
+    const rect = quizBody ? quizBody.getBoundingClientRect() : { left: 200, top: 200, width: 300 };
+    popup.style.left = (rect.left + rect.width / 2 - 35) + 'px';
+    popup.style.top = (rect.top + 80) + 'px';
 
     document.body.appendChild(popup);
-    setTimeout(() => popup.remove(), 1300);
+    setTimeout(() => popup.remove(), 1200);
   }
 
-  // ══ END QUIZ ═══════════════════════════════════════
+  // ══ FIM DO QUIZ / TELA DE RESULTADOS ════════════════
   function endQuiz() {
     const { correct, wrong, wrongItems, isSimulado, moduleId } = quizState;
     const total = correct + wrong;
     const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
 
-    if (pct >= 70 && !isSimulado) {
+    if (pct >= 70 && !isSimulado && moduleId) {
       state.completedModules.add(moduleId);
     }
 
-    // Atualiza melhor pontuação do simulado (termômetro)
     if (isSimulado && correct > state.bestSimuladoScore) {
       state.bestSimuladoScore = correct;
+      updateThermometerHome();
     }
 
-    const oldStars = getModuleStars(
-      state.moduleStats[moduleId]
-        ? Math.round((state.moduleStats[moduleId].correct / (state.moduleStats[moduleId].correct + state.moduleStats[moduleId].wrong)) * 100)
-        : 0
-    );
     const newStars = getModuleStars(pct);
-    const leveledUp = newStars > oldStars && newStars > 0;
-
     saveState();
 
-    // Fill result screen
-    document.getElementById('rs-correct').textContent = correct;
-    document.getElementById('rs-wrong').textContent = wrong;
-    document.getElementById('rs-xp').textContent = `+${correct * XP_CORRECT}`;
-    document.getElementById('rs-pct').textContent = pct + '%';
+    // Preenche estatísticas
+    const rsCorrect = document.getElementById('rs-correct');
+    if (rsCorrect) rsCorrect.textContent = correct;
 
-    // Emoji & title
+    const rsWrong = document.getElementById('rs-wrong');
+    if (rsWrong) rsWrong.textContent = wrong;
+
+    const rsXp = document.getElementById('rs-xp');
+    if (rsXp) rsXp.textContent = `+${correct * XP_CORRECT}`;
+
+    const rsPct = document.getElementById('rs-pct');
+    if (rsPct) rsPct.textContent = pct + '%';
+
+    // Título e emojis
     let emoji, title, subtitle;
-    if (pct >= 90) { emoji = '🏆'; title = 'Nota 10! Incrível!'; subtitle = 'Você está mais que pronta!'; }
-    else if (pct >= 70) { emoji = '🎉'; title = 'Aprovada!'; subtitle = 'Ótimo desempenho! Continue assim.'; }
-    else if (pct >= 50) { emoji = '📚'; title = 'Quase lá!'; subtitle = 'Mais treino neste módulo e você passa.'; }
-    else { emoji = '💡'; title = 'Vamos revisar!'; subtitle = 'Estude mais este conteúdo e tente de novo.'; }
+    if (pct >= 90) {
+      emoji = '🏆';
+      title = 'GABARITOU! Incrível!';
+      subtitle = 'Você está 100% pronta para a prova real do DETRAN!';
+    } else if (pct >= 70) {
+      emoji = '🎉';
+      title = 'APROVADA!';
+      subtitle = 'Desempenho aprovado! Mantenha o ritmo até o dia da prova.';
+    } else if (pct >= 50) {
+      emoji = '📚';
+      title = 'Quase lá!';
+      subtitle = 'Mais um pouco de treino e você atinge a nota de corte (70%).';
+    } else {
+      emoji = '💡';
+      title = 'Vamos treinar mais!';
+      subtitle = 'Revise os conteúdos recomendados e tente novamente.';
+    }
 
-    document.getElementById('result-emoji').textContent = emoji;
-    document.getElementById('result-title').textContent = title;
-    document.getElementById('result-subtitle').textContent = subtitle;
+    const resEmoji = document.getElementById('result-emoji');
+    if (resEmoji) resEmoji.textContent = emoji;
 
-    // Stars with animation
-    const starCount = getModuleStars(pct);
+    const resTitle = document.getElementById('result-title');
+    if (resTitle) resTitle.textContent = title;
+
+    const resSub = document.getElementById('result-subtitle');
+    if (resSub) resSub.textContent = subtitle;
+
+    // Estrelas animadas
     ['star1', 'star2', 'star3'].forEach((id, i) => {
       const el = document.getElementById(id);
-      el.className = 'star';
-      if (i < starCount) setTimeout(() => el.classList.add('lit'), 400 + i * 300);
+      if (el) {
+        el.className = 'star';
+        if (i < newStars) {
+          setTimeout(() => el.classList.add('lit'), 300 + i * 250);
+        }
+      }
     });
 
-    // Painel do termômetro (só no simulado de 52)
+    // Painel do termômetro (no simulado de 52)
     const thermoCard = document.getElementById('thermo-result-card');
     if (isSimulado && thermoCard) {
       thermoCard.style.display = 'flex';
-      document.getElementById('thermo-result-score').textContent = `${correct}/52`;
+      const scoreEl = document.getElementById('thermo-result-score');
+      if (scoreEl) scoreEl.textContent = `${correct}/52`;
 
-      // Mensagem do termômetro
       let thermoMsg = 'Continue treinando!';
-      if (correct >= 52) thermoMsg = 'GABARITOU! Você está mais do que pronta! 🏆';
-      else if (correct >= 45) thermoMsg = 'Excelente! Praticamente gabaritando. (~95% na prova)';
-      else if (correct >= 40) thermoMsg = 'Ótimo! Quase aprovada com folga. (~80% na prova)';
-      else if (correct >= 30) thermoMsg = 'Você está na média. Não pare! (~60% na prova)';
-      else thermoMsg = 'Ainda precisa de bastante treino. Vamos lá!';
+      if (correct >= 50) thermoMsg = 'GABARITANDO! Você está no nível máximo de aprovação! 🏆';
+      else if (correct >= 44) thermoMsg = 'Excelente! Acima de 85% de acertos na prova real. 🚀';
+      else if (correct >= 37) thermoMsg = 'Aprovada! Acima dos 70% mínimos do DETRAN. 💪';
+      else if (correct >= 30) thermoMsg = 'Na trave! Precisa de mais algumas questões para garantir. ⚠️';
+      else thermoMsg = 'Abaixo da média da prova. Foque nos módulos e nas pegadinhas!';
 
-      document.getElementById('thermo-result-msg').textContent = thermoMsg;
+      const msgEl = document.getElementById('thermo-result-msg');
+      if (msgEl) msgEl.textContent = thermoMsg;
 
-      // Barra
       setTimeout(() => {
-        const pctBar = (correct / 52) * 100;
-        document.getElementById('thermo-bar-fill').style.width = pctBar + '%';
-      }, 600);
+        const barFill = document.getElementById('thermo-bar-fill');
+        if (barFill) barFill.style.width = Math.min((correct / 52) * 100, 100) + '%';
+      }, 500);
     } else if (thermoCard) {
       thermoCard.style.display = 'none';
     }
 
-    // XP bar
-    const xpPct = Math.min((state.xp / 1000) * 100, 100);
-    setTimeout(() => {
-      const xpBar = document.getElementById('xp-bar-result');
-      if (xpBar) xpBar.style.width = xpPct + '%';
-      const xpVal = document.getElementById('xp-val-result');
-      if (xpVal) xpVal.textContent = state.xp + ' XP';
-    }, 600);
-
-    // Wrong items review
-    if (wrongItems.length > 0) {
-      document.getElementById('wrong-review').style.display = 'block';
-      const list = document.getElementById('wrong-list');
-      list.innerHTML = wrongItems.map(w => `
-        <div class="wrong-item">
-          <strong>${w.question.substring(0, 70)}...</strong><br/>
-          Sua resposta: ${w.yourAnswer}<br/>
-          Correta: ${w.correctAnswer}
-        </div>
-      `).join('');
-    } else {
-      document.getElementById('wrong-review').style.display = 'none';
+    // Revisão das questões erradas
+    const wrongReview = document.getElementById('wrong-review');
+    const wrongList = document.getElementById('wrong-list');
+    if (wrongReview && wrongList) {
+      if (wrongItems.length > 0) {
+        wrongReview.style.display = 'block';
+        wrongList.innerHTML = wrongItems.map(w => `
+          <div class="wrong-item">
+            <strong>❓ ${w.question}</strong><br/>
+            <span style="color:var(--accent-red)">Sua resposta: ${w.yourAnswer}</span><br/>
+            <span style="color:var(--accent-green);font-weight:600">Resposta correta: ${w.correctAnswer}</span>
+          </div>
+        `).join('');
+      } else {
+        wrongReview.style.display = 'none';
+      }
     }
 
     showScreen('screen-result');
-
-    if (leveledUp) {
-      setTimeout(() => {
-        const mod = MODULES.find(m => m.id === moduleId);
-        document.getElementById('levelup-text').textContent =
-          `Você subiu para ${newStars} estrela${newStars > 1 ? 's' : ''} em ${mod?.name || moduleId}!`;
-        showOverlay('overlay-levelup');
-      }, 1500);
-    }
   }
 
-  // ══ PEGADINHAS ═══════════════════════════════════════
-  const PEGADINHAS = [
-    {
-      tag: 'Legislação',
-      question: 'O motorista pode usar o celular no viva-voz enquanto dirige?',
-      trap: '❌ Armadilha: Muita gente acha que viva-voz libera o uso.',
-      answer: '✅ Não! Qualquer uso de celular ao volante é infração gravisssima, inclusive viva-voz sem suporte fixo.'
-    },
-    {
-      tag: 'Infrações',
-      question: 'Parar no semáforo vermelho sobre a faixa de pedestres é permitido se não houver ninguém cruzando?',
-      trap: '❌ Armadilha: Parece inofensivo quando não tem pedestre.',
-      answer: '✅ Não! É proibido parar sobre a faixa de pedestres em qualquer situação. Infração média.'
-    },
-    {
-      tag: 'Legislação',
-      question: 'CNH vencida é diferente de dirigir sem habilitação?',
-      trap: '❌ Armadilha: São coisas diferentes? Não!',
-      answer: '✅ Para o CTB, ambas são infrações gravissimas com as mesmas penalidades: multa + veículo recolhido.'
-    },
-    {
-      tag: 'Placas',
-      question: 'A placa “Dê a Preferência” é circular como as outras placas de regulamentação?',
-      trap: '❌ Armadilha: A maioria das regulamentações é circular.',
-      answer: '✅ Não! É triangular com borda vermelha — única placa de regulamentação com esse formato.'
-    },
-    {
-      tag: 'Direção Defensiva',
-      question: 'Em caso de aquaplanagem, o correto é frear com força para parar mais rápido?',
-      trap: '❌ Armadilha: Instinto natural é frear.',
-      answer: '✅ Não! Frear bruscamente piora. Solte o acelerador suavemente e mantenha o volante firme até recuperar aderência.'
-    },
-    {
-      tag: 'Infrações',
-      question: 'Os pontos na CNH somem depois de pagar a multa?',
-      trap: '❌ Armadilha: Muita gente paga achando que zera os pontos.',
-      answer: '✅ Não! Os pontos só somem após 12 meses da data da infração, independente do pagamento da multa.'
-    },
-    {
-      tag: 'Primeiros Socorros',
-      question: 'Ao encontrar uma vítima de acidente, devo removê-la do veículo imediatamente para socorrê-la?',
-      trap: '❌ Armadilha: Parece que tirar do local é a coisa certa.',
-      answer: '✅ Não! Só mova a vítima se houver risco imediato de vida no local (fogo, afogamento). Mover errado pode causar paralisia.'
-    },
-    {
-      tag: 'Legislação',
-      question: 'Em rodovias de pista simples, a velocidade máxima para carro é 120 km/h?',
-      trap: '❌ Armadilha: Confunde com pista dupla.',
-      answer: '✅ Não! Em pista simples o limite é 100 km/h. 120 km/h é o limite apenas em pistas duplas.'
-    },
-  ];
-
-  function renderPegadinhas() {
-    const list = document.getElementById('peg-list');
-    if (!list) return;
-    list.innerHTML = PEGADINHAS.map((p, i) => `
-      <div class="peg-item">
-        <div class="peg-item-header">
-          <div class="peg-num">${i + 1}</div>
-          <div class="peg-tag">${p.tag}</div>
-        </div>
-        <div class="peg-question">❓ ${p.question}</div>
-        <div class="peg-trap">${p.trap}</div>
-        <div class="peg-answer">${p.answer}</div>
-      </div>
-    `).join('');
-  }
-    showOverlay('overlay-gameover');
-  }
-
+  // ══ GAME OVER E OVERLAYS ════════════════════════════
   function showGameOver() {
     showOverlay('overlay-gameover');
-  }
-
-  function dismissDesafio() {
-    hideAllOverlays();
-  }
-
-  function startSimuladoFromDesafio() {
-    hideAllOverlays();
-    startSimulado();
   }
 
   function retryModule() {
     hideAllOverlays();
     if (quizState.isSimulado) {
       startSimulado();
-    } else {
+    } else if (quizState.moduleId) {
       startModule(quizState.moduleId);
+    } else {
+      showScreen('screen-home');
     }
   }
 
@@ -673,59 +663,83 @@ const App = (() => {
     hideAllOverlays();
   }
 
-  // ══ STATS ══════════════════════════════════════════
+  function showOverlay(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'flex';
+  }
+
+  function hideAllOverlays() {
+    document.querySelectorAll('.overlay').forEach(o => (o.style.display = 'none'));
+  }
+
+  // ══ ESTATÍSTICAS E PONTOS FRACOS ════════════════════
   function renderStats() {
-    document.getElementById('sc-xp').textContent = state.xp;
-    document.getElementById('sc-correct').textContent = state.totalCorrect;
-    document.getElementById('sc-streak').textContent = state.bestStreak;
-    document.getElementById('sc-total').textContent = state.totalAnswered;
+    const xpEl = document.getElementById('sc-xp');
+    if (xpEl) xpEl.textContent = state.xp;
 
-    // Module stats list
+    const corrEl = document.getElementById('sc-correct');
+    if (corrEl) corrEl.textContent = state.totalCorrect;
+
+    const streakEl = document.getElementById('sc-streak');
+    if (streakEl) streakEl.textContent = state.bestStreak;
+
+    const totEl = document.getElementById('sc-total');
+    if (totEl) totEl.textContent = state.totalAnswered;
+
+    // Desempenho por módulo
     const list = document.getElementById('module-stats-list');
-    list.innerHTML = '';
-    MODULES.forEach(mod => {
-      const stats = state.moduleStats[mod.id] || { correct: 0, wrong: 0, attempts: 0 };
-      const total = stats.correct + stats.wrong;
-      const pct = total > 0 ? Math.round((stats.correct / total) * 100) : 0;
+    if (list && typeof MODULES !== 'undefined') {
+      list.innerHTML = '';
+      MODULES.forEach(mod => {
+        const stats = state.moduleStats[mod.id] || { correct: 0, wrong: 0, attempts: 0 };
+        const total = stats.correct + stats.wrong;
+        const pct = total > 0 ? Math.round((stats.correct / total) * 100) : 0;
 
-      const item = document.createElement('div');
-      item.className = 'module-stat-item';
-      item.innerHTML = `
-        <div class="msi-header">
-          <div class="msi-name">${mod.icon} ${mod.name}</div>
-          <div class="msi-pct" style="color:${mod.color}">${total > 0 ? pct + '%' : '—'}</div>
-        </div>
-        <div class="msi-bar-track">
-          <div class="msi-bar-fill" style="background:${mod.color};width:${pct}%"></div>
-        </div>
-      `;
-      list.appendChild(item);
-    });
-
-    // Weak areas
-    const weakList = document.getElementById('weak-areas-list');
-    weakList.innerHTML = '';
-    const weakTopics = getWeakTopics();
-    if (weakTopics.length === 0) {
-      weakList.innerHTML = '<p style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">🎯 Nenhum ponto fraco detectado ainda. Continue treinando!</p>';
-    } else {
-      weakTopics.forEach(({ mod, pct }) => {
         const item = document.createElement('div');
-        item.className = 'weak-area-item';
+        item.className = 'module-stat-item';
         item.innerHTML = `
-          <span class="icon">${mod.icon}</span>
-          <div class="wai-info">
-            <h4>${mod.name}</h4>
-            <p>${pct}% de acerto — recomendado revisar este módulo</p>
+          <div class="msi-header">
+            <div class="msi-name">${mod.icon} ${mod.name}</div>
+            <div class="msi-pct" style="color:${mod.color}">${total > 0 ? pct + '%' : '—'}</div>
+          </div>
+          <div class="msi-bar-track">
+            <div class="msi-bar-fill" style="background:${mod.color};width:${pct}%"></div>
           </div>
         `;
-        item.onclick = () => { startModule(mod.id); };
-        weakList.appendChild(item);
+        list.appendChild(item);
       });
+    }
+
+    // Pontos fracos
+    const weakList = document.getElementById('weak-areas-list');
+    if (weakList) {
+      weakList.innerHTML = '';
+      const weakTopics = getWeakTopics();
+      if (weakTopics.length === 0) {
+        weakList.innerHTML = `
+          <p style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">
+            🎯 Nenhum ponto fraco crítico detectado ainda! Continue respondendo simulados.
+          </p>`;
+      } else {
+        weakTopics.forEach(({ mod, pct }) => {
+          const item = document.createElement('div');
+          item.className = 'weak-area-item';
+          item.innerHTML = `
+            <span class="icon">${mod.icon}</span>
+            <div class="wai-info">
+              <h4>${mod.name}</h4>
+              <p>${pct}% de aproveitamento — recomendado treinar agora</p>
+            </div>
+          `;
+          item.onclick = () => startModule(mod.id);
+          weakList.appendChild(item);
+        });
+      }
     }
   }
 
   function getWeakTopics() {
+    if (typeof MODULES === 'undefined') return [];
     return MODULES.filter(mod => {
       const stats = state.moduleStats[mod.id];
       if (!stats) return false;
@@ -747,8 +761,10 @@ const App = (() => {
     if (!alert) return;
     if (weakTopics.length > 0) {
       alert.style.display = 'flex';
-      document.getElementById('weak-topics-text').textContent =
-        weakTopics.map(w => `${w.mod.icon} ${w.mod.name} (${w.pct}%)`).join(', ');
+      const textEl = document.getElementById('weak-topics-text');
+      if (textEl) {
+        textEl.textContent = weakTopics.map(w => `${w.mod.icon} ${w.mod.name} (${w.pct}%)`).join(', ');
+      }
     } else {
       alert.style.display = 'none';
     }
@@ -770,28 +786,112 @@ const App = (() => {
     if (text) text.textContent = `${Math.min(state.dailyAnswered, state.dailyGoal)} / ${state.dailyGoal} questões`;
   }
 
-  // ══ NAVIGATION ═════════════════════════════════════
+  // ══ PEGADINHAS DO DETRAN ════════════════════════════
+  const PEGADINHAS = [
+    {
+      tag: 'Legislação',
+      question: 'O motorista pode usar o celular no viva-voz enquanto dirige?',
+      trap: '❌ Armadilha: Muita gente acha que viva-voz libera o uso.',
+      answer: '✅ Não! Qualquer uso de celular ao volante sem suporte fixo e mãos livres é infração gravíssima.'
+    },
+    {
+      tag: 'Infrações',
+      question: 'Parar no semáforo vermelho sobre a faixa de pedestres é permitido se não houver ninguém cruzando?',
+      trap: '❌ Armadilha: Parece inofensivo quando não tem pedestre.',
+      answer: '✅ Não! É proibido parar sobre a faixa de pedestres em qualquer situação. Infração média.'
+    },
+    {
+      tag: 'Legislação',
+      question: 'CNH vencida é diferente de dirigir sem habilitação?',
+      trap: '❌ Armadilha: São infrações diferentes com punições leves? Não!',
+      answer: '✅ Para o CTB, ambas são infrações gravíssimas com recolhimento do documento e retenção do veículo.'
+    },
+    {
+      tag: 'Placas',
+      question: 'A placa “Dê a Preferência” é circular como as outras placas de regulamentação?',
+      trap: '❌ Armadilha: A quase totalidade das regulamentações é circular.',
+      answer: '✅ Não! É triangular com borda vermelha e vértice para baixo — única placa de regulamentação com esse formato.'
+    },
+    {
+      tag: 'Direção Defensiva',
+      question: 'Em caso de aquaplanagem, o correto é frear com força para parar mais rápido?',
+      trap: '❌ Armadilha: O reflexo imediato é pisar no freio.',
+      answer: '✅ Não! Frear bruscamente trava as rodas e piora a derrapagem. O correto é soltar o acelerador e manter o volante reto.'
+    },
+    {
+      tag: 'Infrações',
+      question: 'Os pontos na CNH somem depois de pagar a multa?',
+      trap: '❌ Armadilha: Achar que o pagamento quita os pontos.',
+      answer: '✅ Não! Os pontos duram 12 meses a contar da data do cometimento da infração, independente do pagamento do boleto.'
+    },
+    {
+      tag: 'Primeiros Socorros',
+      question: 'Ao encontrar uma vítima de acidente, devo removê-la do veículo imediatamente para socorrê-la?',
+      trap: '❌ Armadilha: Tirar a vítima do carro parece urgente.',
+      answer: '✅ Não! Só mova a vítima em caso de risco imediato e fatal (fogo, explosão). Mover sem preparo pode causar paralisia permanente na coluna.'
+    },
+    {
+      tag: 'Legislação',
+      question: 'Em rodovias de pista simples, a velocidade máxima para automóveis é 120 km/h?',
+      trap: '❌ Armadilha: Confundir o limite de pista simples com o de pista dupla.',
+      answer: '✅ Não! Em pista simples o limite é 100 km/h. 120 km/h é exclusivo para rodovias de pista dupla.'
+    }
+  ];
+
+  function renderPegadinhas() {
+    const list = document.getElementById('peg-list');
+    if (!list) return;
+    list.innerHTML = PEGADINHAS.map((p, i) => `
+      <div class="peg-item">
+        <div class="peg-item-header">
+          <div class="peg-num">${i + 1}</div>
+          <div class="peg-tag">${p.tag}</div>
+        </div>
+        <div class="peg-question">❓ ${p.question}</div>
+        <div class="peg-trap">${p.trap}</div>
+        <div class="peg-answer">${p.answer}</div>
+      </div>
+    `).join('');
+  }
+
+  // ══ NAVEGAÇÃO ENTRE TELAS E ABAS ════════════════════
   function showScreen(screenId) {
+    hideAllOverlays();
+
     document.querySelectorAll('.screen').forEach(s => {
       s.style.display = 'none';
       s.classList.remove('active');
     });
+
     const target = document.getElementById(screenId);
     if (target) {
       target.style.display = 'flex';
       target.classList.add('active');
     }
 
+    // Sincroniza abas do rodapé
+    let activeTab = 'home';
+    if (screenId === 'screen-stats') activeTab = 'stats';
+    else if (screenId === 'screen-pegadinhas') activeTab = 'pegadinhas';
+
+    updateNavTabs(activeTab);
+
+    // Atualizações específicas por tela
     if (screenId === 'screen-home') {
       renderModulesGrid();
       updateHeaderStats();
       updateDailyGoal();
       updateWeakAlert();
+      updateGreeting();
+      updateThermometerHome();
+    } else if (screenId === 'screen-stats') {
+      renderStats();
+    } else if (screenId === 'screen-pegadinhas') {
+      renderPegadinhas();
     }
 
-    if (screenId === 'screen-stats') {
-      renderStats();
-    }
+    // Scroll para o topo
+    window.scrollTo(0, 0);
   }
 
   function showTab(tab) {
@@ -804,24 +904,30 @@ const App = (() => {
     }
   }
 
-  function showOverlay(id) {
-    document.getElementById(id).style.display = 'flex';
+  function updateNavTabs(activeTab) {
+    document.querySelectorAll('.bottom-nav').forEach(nav => {
+      nav.querySelectorAll('.nav-btn').forEach(btn => {
+        const onclickAttr = btn.getAttribute('onclick') || '';
+        if (onclickAttr.includes(`'${activeTab}'`)) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    });
   }
 
-  function hideAllOverlays() {
-    document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
-  }
-
-  // ══ UTILS ══════════════════════════════════════════
+  // ══ UTILITÁRIOS ═════════════════════════════════════
   function shuffle(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
+    const clone = [...arr];
+    for (let i = clone.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
+      [clone[i], clone[j]] = [clone[j], clone[i]];
     }
-    return arr;
+    return clone;
   }
 
-  // ══ PUBLIC API ══════════════════════════════════════
+  // ══ API PÚBLICA ═════════════════════════════════════
   return {
     init,
     showScreen,
@@ -837,5 +943,7 @@ const App = (() => {
   };
 })();
 
-// Boot
-document.addEventListener('DOMContentLoaded', () => App.init());
+// Boot quando o DOM estiver carregado
+document.addEventListener('DOMContentLoaded', () => {
+  App.init();
+});
