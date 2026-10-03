@@ -27,7 +27,7 @@ const MODULES = [
     id: 'infracoes',
     name: 'Infrações e Multas',
     icon: '⚠️',
-    iconImg: null,
+    iconImg: 'images/placas/05-r7-proibido-ultrapassar.png',
     color: '#FFD700',
     description: 'Classificação, pontos e penalidades'
   },
@@ -207,6 +207,7 @@ const QUESTIONS = {
     },
     {
       id: 'plc03',
+      image: 'images/placas/01-r1-pare.png',
       text: 'A placa "PARE" (R-1) tem qual formato?',
       options: ['Circular', 'Triangular', 'Octogonal (8 lados)', 'Retangular'],
       correct: 2,
@@ -226,6 +227,7 @@ const QUESTIONS = {
     },
     {
       id: 'plc05',
+      image: 'images/placas/02-r2-preferencia.png',
       text: 'A placa "Dê a Preferência" (R-2) tem qual formato?',
       options: ['Circular com borda vermelha', 'Triangular com borda vermelha', 'Octogonal', 'Retangular azul'],
       correct: 1,
@@ -245,6 +247,7 @@ const QUESTIONS = {
     },
     {
       id: 'plc07',
+      image: 'images/placas/07-a33a-area-escolar.png',
       text: 'Uma placa com fundo AMARELO e o símbolo de uma criança indica:',
       options: [
         'Proibido crianças neste trecho',
@@ -281,6 +284,7 @@ const QUESTIONS = {
     },
     {
       id: 'plc10',
+      image: 'images/placas/03-r3-sentido-proibido.png',
       text: 'Uma placa circular vermelha com uma seta para baixo (↓) no centro indica:',
       options: [
         'Proibida a ultrapassagem',
@@ -430,6 +434,7 @@ const QUESTIONS = {
     },
     {
       id: 'dir02',
+      image: 'images/cenas/02-aquaplanagem.png',
       text: 'Em caso de aquaplanagem (pneu perdendo contato com o asfalto molhado), o correto é:',
       options: [
         'Frear com força total imediatamente',
@@ -442,6 +447,7 @@ const QUESTIONS = {
     },
     {
       id: 'dir03',
+      image: 'images/cenas/03-distancia-segura.png',
       text: 'Qual é a distância mínima de segurança recomendada em relação ao veículo à frente?',
       options: [
         '1 metro por 10 km/h de velocidade',
@@ -454,6 +460,7 @@ const QUESTIONS = {
     },
     {
       id: 'dir04',
+      image: 'images/cenas/04-sono-ao-volante.png',
       text: 'O que é a "fadiga ao volante" e como ela afeta a condução?',
       options: [
         'Um aquecimento do motor que reduz a potência do veículo',
@@ -466,6 +473,7 @@ const QUESTIONS = {
     },
     {
       id: 'dir05',
+      image: 'images/cenas/07-farois-na-neblina.png',
       text: 'Em condições de neblina intensa, qual equipamento deve ser utilizado e qual deve ser EVITADO?',
       options: [
         'Usar farol alto; evitar farol baixo',
@@ -478,6 +486,7 @@ const QUESTIONS = {
     },
     {
       id: 'dir06',
+      image: 'images/cenas/08-pontos-cegos.png',
       text: 'O que é o "ponto cego" no automóvel?',
       options: [
         'A área à frente do veículo não visível pelo motorista',
@@ -502,6 +511,7 @@ const QUESTIONS = {
     },
     {
       id: 'dir08',
+      image: 'images/cenas/06-freio-motor.png',
       text: 'Em uma descida longa e íngreme, para preservar os freios e ter controle do veículo, o correto é:',
       options: [
         'Manter o pé no freio pressionado continuamente',
@@ -541,6 +551,7 @@ const QUESTIONS = {
   primeiros_socorros: [
     {
       id: 'ps01',
+      image: 'images/cenas/05-acidente-sinalizacao-samu.png',
       text: 'Ao se deparar com uma vítima de acidente, qual é a PRIMEIRA ação recomendada?',
       options: [
         'Mover a vítima imediatamente para longe do veículo',
@@ -635,6 +646,7 @@ const QUESTIONS = {
   mecanica: [
     {
       id: 'mec01',
+      image: 'images/cenas/10-alertas-do-painel.png',
       text: 'A luz de óleo acesa no painel durante a condução indica:',
       options: [
         'Hora de trocar o óleo (quilometragem atingida)',
@@ -659,6 +671,7 @@ const QUESTIONS = {
     },
     {
       id: 'mec03',
+      image: 'images/cenas/09-calibragem-dos-pneus.png',
       text: 'Qual é o intervalo recomendado para verificação da calibragem dos pneus?',
       options: [
         'Apenas quando o pneu estiver visivelmente murcho',
