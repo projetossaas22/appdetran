@@ -61,10 +61,10 @@ const QUESTIONS = {
   legislacao: [
     {
       id: 'leg01',
-      text: 'Qual a velocidade máxima permitida para automóveis em rodovias de pista dupla, de acordo com o CTB?',
-      options: ['80 km/h', '100 km/h', '110 km/h', '120 km/h'],
+      text: 'Onde não existir sinalização regulamentadora, qual a velocidade máxima permitida para automóveis em rodovias de pista dupla?',
+      options: ['80 km/h', '90 km/h', '100 km/h', '110 km/h'],
       correct: 3,
-      explanation: '✅ Conforme o Art. 61 do CTB (atualizado pela Lei 14.071/20), onde não houver sinalização regulamentadora, a velocidade máxima nas rodovias de PISTA DUPLA é de 120 km/h para automóveis, camionetas, caminhonetes e motocicletas. Em rodovias de PISTA SIMPLES, o limite é de 100 km/h. ⚠️ Cuidado com a pegadinha de confundir pista simples com pista dupla!'
+      explanation: '✅ Conforme o Art. 61, § 1º, II, "a" do CTB: Onde NÃO existir sinalização regulamentadora, a velocidade máxima nas rodovias de PISTA DUPLA é de 110 km/h para automóveis, camionetas, caminhonetes e motocicletas (e 90 km/h para os demais veículos). Já nas rodovias de PISTA SIMPLES, o limite para esses mesmos veículos é de 100 km/h.'
     },
     {
       id: 'leg02',
@@ -76,7 +76,7 @@ const QUESTIONS = {
         'Multa grave e 5 pontos na CNH'
       ],
       correct: 1,
-      explanation: 'Dirigir sob influência de álcool é infração gravíssima. O motorista tem a CNH recolhida, o carro retido, paga multa de R$ 2.934,70 e fica suspenso por 12 meses. Pode responder criminalmente também.'
+      explanation: 'Dirigir sob influência de álcool é infração gravíssima (Art. 165 do CTB). O motorista tem a CNH recolhida, o carro retido, paga multa com fator multiplicador por 10 (R$ 2.934,70) e responde a processo de suspensão do direito de dirigir por 12 meses.'
     },
     {
       id: 'leg03',
@@ -104,10 +104,10 @@ const QUESTIONS = {
     },
     {
       id: 'leg05',
-      text: 'Qual é a distância mínima que deve existir entre veículos estacionados na mesma calçada?',
-      options: ['1 metro', '3 metros', '5 metros', '6 metros'],
+      text: 'Ao estacionar um veículo junto a uma esquina, qual é a distância mínima que deve ser mantida em relação ao bordo do alinhamento da via transversal?',
+      options: ['1 metro', '3 metros', '5 metros', '10 metros'],
       correct: 2,
-      explanation: 'O CTB exige distância mínima de 5 metros entre veículos estacionados na mesma margem da via, para garantir a visibilidade e o acesso.'
+      explanation: '✅ Conforme o Art. 181, I do CTB, é proibido estacionar o veículo nas esquinas e a menos de 5 metros do bordo do alinhamento da via transversal. Essa infração é de natureza MÉDIA (4 pontos) com penalidade de multa e remoção do veículo.'
     },
     {
       id: 'leg06',
@@ -154,10 +154,10 @@ const QUESTIONS = {
     },
     {
       id: 'leg10',
-      text: 'Qual é o limite de pontos na CNH antes de ter a habilitação suspensa?',
-      options: ['15 pontos', '20 pontos', '25 pontos', '40 pontos'],
-      correct: 1,
-      explanation: 'Desde a atualização do CTB, o limite geral é de 40 pontos. Porém, para habilitados há menos de 1 ano, o limite é de 20 pontos. Ao atingir o limite, a CNH é suspensa.'
+      text: 'De acordo com o CTB atualizado (Lei 14.071/20), o condutor que não cometer NENHUMA infração gravíssima no período de 12 meses terá a CNH suspensa ao atingir quantos pontos?',
+      options: ['20 pontos', '30 pontos', '40 pontos', '50 pontos'],
+      correct: 2,
+      explanation: '✅ Conforme o Art. 261 do CTB (atualizado pela Lei 14.071/20): O limite para suspensão da CNH é de 40 pontos caso o condutor NÃO tenha nenhuma infração gravíssima; 30 pontos se constar 1 infração gravíssima; e 20 pontos caso constem 2 ou mais infrações gravíssimas.'
     },
     {
       id: 'leg11',
@@ -173,10 +173,10 @@ const QUESTIONS = {
     },
     {
       id: 'leg12',
-      text: 'Segundo o CTB, qual a velocidade máxima em vias urbanas com uma faixa de rolamento?',
+      text: 'Onde não existir sinalização regulamentadora, qual a velocidade máxima permitida nas vias urbanas classificadas como LOCAIS?',
       options: ['30 km/h', '40 km/h', '50 km/h', '60 km/h'],
-      correct: 2,
-      explanation: 'Em vias urbanas com uma faixa de rolamento, a velocidade máxima é de 30 km/h. Com duas ou mais faixas, é de 50 km/h. Em vias arteriais, pode chegar a 60 km/h ou mais, conforme a sinalização.'
+      correct: 0,
+      explanation: '✅ Conforme o Art. 61, § 1º, I do CTB, onde NÃO houver sinalização, a velocidade máxima nas vias urbanas é: Vias Locais = 30 km/h; Vias Coletoras = 40 km/h; Vias Arteriais = 60 km/h; Vias de Trânsito Rápido = 80 km/h.'
     }
   ],
 
@@ -235,15 +235,15 @@ const QUESTIONS = {
     },
     {
       id: 'plc06',
-      text: 'O que significa uma placa circular com fundo azul e uma letra "P" branca?',
+      text: 'A placa de regulamentação R-6b, composta por um círculo de borda vermelha, fundo branco e a letra "E" preta, indica:',
       options: [
-        'Proibido estacionar neste local',
-        'Estacionamento permitido neste local',
-        'Área de pedágio à frente',
-        'Posto de gasolina próximo'
+        'Estacionamento regulamentado',
+        'Proibido estacionar',
+        'Proibido parar e estacionar',
+        'Ponto de parada de ônibus'
       ],
-      correct: 1,
-      explanation: 'A placa azul com "P" branco é uma placa de indicação que sinaliza um local onde o estacionamento é permitido. Já a placa com "P" riscado (tachado) significa proibido estacionar.'
+      correct: 0,
+      explanation: '✅ A placa R-6b (Estacionamento Regulamentado) regulamenta o direito de estacionar na área sinalizada, podendo conter informações complementares de horário ou categoria de veículo. A placa com uma tarja diagonal vermelha (R-6a) proíbe o estacionamento, e com duas tarjas em "X" (R-6c) proíbe a parada e o estacionamento.'
     },
     {
       id: 'plc07',
@@ -260,15 +260,15 @@ const QUESTIONS = {
     },
     {
       id: 'plc08',
-      text: 'O que significa a placa com dois triângulos opostos no centro de uma via?',
+      text: 'A placa de advertência A-25, em formato de losango amarelo com duas setas verticais apontadas em sentidos opostos, alerta o condutor sobre:',
       options: [
-        'Via de mão dupla à frente',
-        'Proibido trafegar',
+        'Mão dupla adiante',
         'Sentido único de circulação',
+        'Pista dividida',
         'Desvio obrigatório à direita'
       ],
       correct: 0,
-      explanation: 'Esta placa de advertência indica que há um trecho de via de mão dupla à frente, alertando o motorista que até então está em via de mão única. É fundamental reduzir a velocidade e redobrar a atenção.'
+      explanation: '✅ A placa A-25 (Mão Dupla Adiante) adverte que a via, até então de sentido único, passará a operar em mão dupla de direção à frente. O condutor deve se posicionar à direita e redobrar os cuidados.'
     },
     {
       id: 'plc09',
@@ -285,15 +285,15 @@ const QUESTIONS = {
     {
       id: 'plc10',
       image: 'images/placas/03-r3-sentido-proibido.png',
-      text: 'Uma placa circular vermelha com uma seta para baixo (↓) no centro indica:',
+      text: 'A placa de regulamentação R-3, representada por um círculo com borda vermelha, fundo branco, uma seta preta apontada para cima cortada por uma faixa diagonal vermelha, indica:',
       options: [
-        'Proibida a ultrapassagem',
-        'Descida acentuada',
-        'Velocidade reduzida',
-        'Sentido proibido nesta direção'
+        'Proibido ultrapassar',
+        'Sentido proibido',
+        'Velocidade reduzida à frente',
+        'Proibido virar à esquerda'
       ],
-      correct: 3,
-      explanation: 'A placa R-3 (Sentido Proibido) é circular vermelha com uma seta apontando para baixo, indicando que é proibido trafegar naquela direção. Entrar nesta via é infração gravíssima e altamente perigosa.'
+      correct: 1,
+      explanation: '✅ A placa R-3 (Sentido Proibido) proíbe o trânsito de qualquer veículo no sentido indicado pela seta. Entrar em via regulamentada com esta placa constitui infração GRAVÍSSIMA (7 pontos), com risco grave de colisão frontal.'
     },
     {
       id: 'plc11',
@@ -339,7 +339,7 @@ const QUESTIONS = {
       text: 'Quantos pontos são adicionados à CNH por uma infração GRAVÍSSIMA?',
       options: ['3 pontos', '4 pontos', '5 pontos', '7 pontos'],
       correct: 3,
-      explanation: 'Infrações gravíssimas valem 7 pontos na CNH. São exemplos: dirigir bêbado, ultrapassar em local proibido, avançar sinal vermelho, usar celular, disputar "racha" e não usar cinto de segurança.'
+      explanation: 'Infrações gravíssimas valem 7 pontos na CNH. São exemplos: dirigir sob efeito de álcool, ultrapassar em local proibido, avançar sinal vermelho, disputar racha e manusear celular ao volante. (Lembrando: deixar de usar o cinto é infração GRAVE, com 5 pontos).'
     },
     {
       id: 'inf03',
@@ -350,15 +350,15 @@ const QUESTIONS = {
     },
     {
       id: 'inf04',
-      text: 'O que é a infração de "racha" (competição ou exibicionismo)?',
+      text: 'O que o CTB prevê para quem participa de "racha" (disputar corrida por espírito de emulação)?',
       options: [
         'Infração grave com 5 pontos',
-        'Infração gravíssima com multa multiplicada por 3',
+        'Infração gravíssima com multa multiplicada por 10, suspensão da CNH e crime de trânsito',
         'Infração média apenas com advertência',
         'Infração leve em via com pouco trânsito'
       ],
       correct: 1,
-      explanation: 'Participar de "racha" (competição, corrida ou exibicionismo) é infração gravíssima com a multa multiplicada por 3, veículo apreendido, CNH suspensa e o motorista pode responder criminalmente. É um dos crimes mais graves do CTB.'
+      explanation: '✅ Conforme o Art. 173 do CTB, disputar racha é infração GRAVÍSSIMA, com multa multiplicada por 10 (R$ 2.934,70), suspensão do direito de dirigir e remoção do veículo. Além disso, configura CRIME DE TRÂNSITO previsto no Art. 308 do CTB.'
     },
     {
       id: 'inf05',
@@ -389,9 +389,9 @@ const QUESTIONS = {
     {
       id: 'inf08',
       text: 'Estacionar em vaga reservada para idosos ou pessoas com deficiência sem o credenciamento é infração:',
-      options: ['Leve', 'Média', 'Grave', 'Gravíssima com multa em dobro'],
+      options: ['Leve', 'Média', 'Grave', 'Gravíssima com remoção do veículo'],
       correct: 3,
-      explanation: 'Estacionar em vaga reservada para idosos, grávidas ou PCDs sem credencial é infração gravíssima com a multa dobrada. Trata-se de agressão a grupos vulneráveis protegidos por lei.'
+      explanation: '✅ Conforme o Art. 181, XX do CTB, estacionar nas vagas reservadas às pessoas com deficiência ou idosos, sem credencial que comprove tal condição, é infração GRAVÍSSIMA (7 pontos), com multa e medida administrativa de remoção do veículo.'
     },
     {
       id: 'inf09',
