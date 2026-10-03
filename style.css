@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════
-   TreinaDETRAN — style.css
+   DetranQuiz — style.css
+   Método Gabarita Detran
    Design system: Dark mode + Neon Orange
    ═══════════════════════════════════════ */
 
@@ -210,6 +211,25 @@ body {
   max-width: 320px;
   line-height: 1.6;
 }
+.splash-brand {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--primary-light);
+  opacity: 0.8;
+}
+
+.splash-price-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: -8px;
+}
+
+.splash-price-hint strong {
+  color: var(--accent-green);
+  font-weight: 700;
+}
 
 .splash-stats {
   position: relative;
@@ -220,6 +240,15 @@ body {
   padding: 24px 24px 48px;
   border-top: 1px solid var(--border);
   width: 100%;
+}
+
+.app-sub-brand {
+  display: block;
+  font-size: 10px;
+  color: var(--primary-light);
+  font-weight: 500;
+  opacity: 0.7;
+  margin-top: -2px;
 }
 
 .stat-item {
@@ -1295,19 +1324,293 @@ body {
 /* ══════════════════════════════════════
    XP POPUP
 ══════════════════════════════════════ */
-.xp-popup {
-  position: fixed;
-  pointer-events: none;
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--accent);
-  z-index: 500;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-  animation: xpFloat 1.2s ease forwards;
+/* ═══════════════════════════════════════
+   TERMOMETRO
+═══════════════════════════════════════ */
+.thermometer-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(255,107,0,0.12), rgba(255,215,0,0.06));
+  border: 1px solid rgba(255,107,0,0.25);
+  border-radius: var(--r-xl);
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: transform var(--t-fast), box-shadow var(--t-fast);
 }
 
-@keyframes xpFloat {
-  0%   { opacity: 1; transform: translateY(0) scale(1); }
-  80%  { opacity: 0.6; transform: translateY(-60px) scale(1.2); }
-  100% { opacity: 0; transform: translateY(-80px) scale(0.8); }
+.thermometer-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
 }
+
+.thermo-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.thermo-icon { font-size: 28px; }
+
+.thermo-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--primary-light);
+}
+
+.thermo-sub {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.thermo-score {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* Thermo Result */
+.thermo-result-card {
+  width: 100%;
+  max-width: 360px;
+  background: linear-gradient(135deg, rgba(255,107,0,0.1), rgba(255,215,0,0.06));
+  border: 1px solid rgba(255,107,0,0.3);
+  border-radius: var(--r-xl);
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.thermo-result-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.thermo-result-score {
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.thermo-result-msg {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.thermo-bar-track {
+  position: relative;
+  height: 16px;
+  background: var(--bg-input);
+  border-radius: var(--r-full);
+  overflow: visible;
+  margin: 8px 0 4px;
+}
+
+.thermo-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-red), var(--accent), var(--accent-green));
+  border-radius: var(--r-full);
+  transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  width: 0%;
+}
+
+.thermo-marker {
+  position: absolute;
+  top: -18px;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.thermo-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════
+   BUY CTA / WHATSAPP
+═══════════════════════════════════════ */
+.buy-cta {
+  width: 100%;
+  max-width: 360px;
+  background: rgba(34,212,90,0.06);
+  border: 1px solid rgba(34,212,90,0.2);
+  border-radius: var(--r-xl);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+}
+
+.buy-cta-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.buy-cta-text strong { color: var(--text-primary); }
+
+.btn-whatsapp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  border-radius: var(--r-lg);
+  color: white;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 15px 20px;
+  text-decoration: none;
+  transition: transform var(--t-fast), box-shadow var(--t-fast);
+  letter-spacing: 0.2px;
+}
+
+.btn-whatsapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37,211,102,0.3);
+}
+
+/* ═══════════════════════════════════════
+   PEGADINHAS
+═══════════════════════════════════════ */
+.peg-content {
+  flex: 1;
+  padding: 20px 20px 90px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.peg-intro {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  background: rgba(255,107,0,0.06);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--r-md);
+  padding: 14px;
+}
+
+.peg-intro strong { color: var(--primary-light); }
+
+.peg-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.peg-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: border-color var(--t-fast);
+}
+
+.peg-item:hover { border-color: var(--border-accent); }
+
+.peg-item-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.peg-num {
+  width: 26px; height: 26px;
+  background: rgba(255,107,0,0.15);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--primary-light);
+  flex-shrink: 0;
+}
+
+.peg-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.peg-question {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.peg-trap {
+  font-size: 12px;
+  color: var(--accent-red);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.peg-answer {
+  font-size: 12px;
+  color: var(--accent-green);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════
+   DESAFIO OVERLAY
+═══════════════════════════════════════ */
+.desafio-card {
+  border-color: rgba(255,215,0,0.3) !important;
+  background: linear-gradient(135deg, var(--bg-card), rgba(255,215,0,0.06)) !important;
+}
+
+.desafio-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.desafio-opt {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color var(--t-fast), color var(--t-fast);
+}
+
+.desafio-opt:hover {
+  border-color: var(--border-accent);
+  color: var(--text-primary);
+}
+
+.desafio-opt.highlight {
+  border-color: rgba(255,215,0,0.3);
+  color: var(--accent);
+  background: rgba(255,215,0,0.06);
+}
+
