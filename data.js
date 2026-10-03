@@ -10,14 +10,16 @@ const MODULES = [
   {
     id: 'legislacao',
     name: 'Legislação e CTB',
-    icon: '📜',
+    icon: '\ud83d\udcdc',
+    iconImg: 'images/icons/07-livro-legislacao.png',
     color: '#4A9EFF',
     description: 'Código de Trânsito Brasileiro e normas de circulação'
   },
   {
     id: 'placas',
     name: 'Placas e Sinais',
-    icon: '🚦',
+    icon: '\ud83d\udea6',
+    iconImg: 'images/icons/08-placa-sinalizacao.png',
     color: '#22D45A',
     description: 'Regulamentação, advertência e indicação'
   },
@@ -25,27 +27,31 @@ const MODULES = [
     id: 'infracoes',
     name: 'Infrações e Multas',
     icon: '⚠️',
+    iconImg: null,
     color: '#FFD700',
     description: 'Classificação, pontos e penalidades'
   },
   {
     id: 'direcao',
     name: 'Direção Defensiva',
-    icon: '🛡️',
+    icon: '\ud83d\udee1️',
+    iconImg: 'images/icons/06-escudo-check.png',
     color: '#FF6B00',
     description: 'Técnicas para evitar acidentes'
   },
   {
     id: 'primeiros_socorros',
     name: 'Primeiros Socorros',
-    icon: '🚑',
+    icon: '\ud83d\ude91',
+    iconImg: 'images/icons/09-cruz-primeiros-socorros.png',
     color: '#FF4545',
     description: 'Procedimentos em caso de acidente'
   },
   {
     id: 'mecanica',
     name: 'Mecânica Básica',
-    icon: '🔧',
+    icon: '\ud83d\udd27',
+    iconImg: 'images/icons/10-chave-engrenagem.png',
     color: '#A855F7',
     description: 'Manutenção preventiva e noções do veículo'
   }
