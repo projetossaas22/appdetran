@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TreinaDETRAN — Não estude. Treine.</title>
+  <meta name="description" content="App de treino inteligente para a prova teórica do DETRAN. Questões por tema, feedback imediato, XP, vidas e simulado final." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ══ TELA 1: SPLASH / HERO ══ -->
+  <div id="screen-splash" class="screen active">
+    <div class="splash-bg">
+      <div class="road-lines"></div>
+      <div class="particles" id="particles"></div>
+    </div>
+    <div class="splash-content">
+      <div class="logo-badge">🚗</div>
+      <h1 class="splash-title">TreinaDETRAN</h1>
+      <p class="splash-tagline">"Não estude para a prova.<br/><strong>Treine para ela.</strong>"</p>
+      <p class="splash-sub">Treino Inteligente por Quiz — aprenda respondendo, corrija na hora e descubra onde você ainda erra.</p>
+      <button class="btn-primary btn-xl pulse" id="btn-start" onclick="App.showScreen('screen-home')">
+        Começar Agora 🚀
+      </button>
+    </div>
+    <div class="splash-stats">
+      <div class="stat-item"><span class="stat-number">30</span><span class="stat-label">Questões na prova</span></div>
+      <div class="stat-item"><span class="stat-number">70%</span><span class="stat-label">Para passar</span></div>
+      <div class="stat-item"><span class="stat-number">6</span><span class="stat-label">Módulos de treino</span></div>
+    </div>
+  </div>
+
+  <!-- ══ TELA 2: HOME / MÓDULOS ══ -->
+  <div id="screen-home" class="screen">
+    <header class="app-header">
+      <div class="header-left">
+        <span class="app-logo">🚗</span>
+        <span class="app-name">TreinaDETRAN</span>
+      </div>
+      <div class="header-right">
+        <div class="xp-badge" id="header-xp">
+          <span class="xp-icon">⚡</span>
+          <span id="total-xp-display">0 XP</span>
+        </div>
+        <div class="streak-badge" id="header-streak">
+          <span>🔥</span>
+          <span id="streak-display">0</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="home-content">
+      <div class="home-greeting">
+        <h2 id="greeting-text">Bora treinar hoje? 💪</h2>
+        <p id="greeting-sub">Escolha um módulo para começar</p>
+      </div>
+
+      <!-- Daily Goal -->
+      <div class="daily-goal-card">
+        <div class="daily-goal-header">
+          <span>🎯 Meta Diária</span>
+          <span id="daily-progress-text">0 / 10 questões</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="daily-progress-bar" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Weak Areas Alert -->
+      <div class="weak-alert" id="weak-alert" style="display:none">
+        <span class="weak-icon">⚠️</span>
+        <div>
+          <strong>Você precisa revisar:</strong>
+          <span id="weak-topics-text"></span>
+        </div>
+      </div>
+
+      <!-- Modules Grid -->
+      <h3 class="section-title">📚 Módulos de Treino</h3>
+      <div class="modules-grid" id="modules-grid">
+        <!-- Gerado via JS -->
+      </div>
+
+      <!-- Simulado Final -->
+      <div class="simulado-card" onclick="App.startSimulado()">
+        <div class="simulado-icon">📋</div>
+        <div class="simulado-info">
+          <h3>Simulado Final</h3>
+          <p>30 questões • Todas as matérias • Tempo livre</p>
+        </div>
+        <div class="simulado-arrow">→</div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn active" onclick="App.showTab('home')" id="nav-home">
+        <span>🏠</span><span>Início</span>
+      </button>
+      <button class="nav-btn" onclick="App.showTab('stats')" id="nav-stats">
+        <span>📊</span><span>Progresso</span>
+      </button>
+      <button class="nav-btn" onclick="App.showTab('rank')" id="nav-rank">
+        <span>🏆</span><span>Ranking</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ══ TELA 3: QUIZ ══ -->
+  <div id="screen-quiz" class="screen">
+    <!-- Quiz Header -->
+    <div class="quiz-header">
+      <button class="btn-back" id="btn-back-quiz" onclick="App.exitQuiz()">✕</button>
+      <div class="quiz-module-name" id="quiz-module-name">Legislação</div>
+      <div class="lives-display" id="lives-display">
+        <!-- corações gerados via JS -->
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="quiz-progress-wrap">
+      <div class="quiz-progress-track">
+        <div class="quiz-progress-fill" id="quiz-progress-fill" style="width:0%"></div>
+      </div>
+      <span class="quiz-progress-text" id="quiz-progress-text">0/10</span>
+    </div>
+
+    <!-- XP Streak Bar -->
+    <div class="streak-bar" id="streak-bar">
+      <span class="streak-label">🔥 Sequência:</span>
+      <span class="streak-count" id="current-streak">0</span>
+    </div>
+
+    <!-- Question Card -->
+    <div class="quiz-body">
+      <div class="question-card" id="question-card">
+        <div class="question-number" id="question-number">Questão 1</div>
+        <div class="question-tag" id="question-tag">Legislação</div>
+        <p class="question-text" id="question-text">Carregando...</p>
+        <div class="question-img-wrap" id="question-img-wrap" style="display:none">
+          <img id="question-img" src="" alt="Imagem da questão" />
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="options-list" id="options-list">
+        <!-- Gerado via JS -->
+      </div>
+
+      <!-- Feedback -->
+      <div class="feedback-panel" id="feedback-panel" style="display:none">
+        <div class="feedback-icon" id="feedback-icon">✅</div>
+        <div class="feedback-content">
+          <p class="feedback-title" id="feedback-title">Correto!</p>
+          <p class="feedback-text" id="feedback-text"></p>
+        </div>
+        <button class="btn-next" id="btn-next" onclick="App.nextQuestion()">
+          Próxima <span>→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TELA 4: RESULTADO ══ -->
+  <div id="screen-result" class="screen">
+    <div class="result-content">
+      <div class="result-emoji" id="result-emoji">🎉</div>
+      <h2 class="result-title" id="result-title">Módulo Concluído!</h2>
+      <p class="result-subtitle" id="result-subtitle">Você foi bem!</p>
+
+      <div class="result-stats-grid">
+        <div class="result-stat">
+          <span class="rs-number" id="rs-correct">0</span>
+          <span class="rs-label">Acertos</span>
+        </div>
+        <div class="result-stat">
+          <span class="rs-number" id="rs-wrong">0</span>
+          <span class="rs-label">Erros</span>
+        </div>
+        <div class="result-stat">
+          <span class="rs-number" id="rs-xp">+0</span>
+          <span class="rs-label">XP ganho</span>
+        </div>
+        <div class="result-stat">
+          <span class="rs-number" id="rs-pct">0%</span>
+          <span class="rs-label">Aproveitamento</span>
+        </div>
+      </div>
+
+      <!-- Stars -->
+      <div class="stars-display" id="stars-display">
+        <span class="star" id="star1">⭐</span>
+        <span class="star" id="star2">⭐</span>
+        <span class="star" id="star3">⭐</span>
+      </div>
+
+      <!-- XP Bar Animation -->
+      <div class="xp-bar-wrap">
+        <span class="xp-bar-label">XP Total</span>
+        <div class="xp-bar-track">
+          <div class="xp-bar-fill" id="xp-bar-result"></div>
+        </div>
+        <span class="xp-bar-val" id="xp-val-result">0 XP</span>
+      </div>
+
+      <!-- Wrong answers review -->
+      <div class="wrong-review" id="wrong-review" style="display:none">
+        <h4>📌 O que você errou — revise agora:</h4>
+        <div id="wrong-list"></div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn-primary" onclick="App.retryModule()">🔁 Tentar Novamente</button>
+        <button class="btn-secondary" onclick="App.showScreen('screen-home')">🏠 Início</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TELA 5: STATS / PROGRESSO ══ -->
+  <div id="screen-stats" class="screen" style="display:none">
+    <header class="app-header">
+      <div class="header-left">
+        <span class="app-logo">📊</span>
+        <span class="app-name">Meu Progresso</span>
+      </div>
+    </header>
+    <div class="stats-content">
+      <div class="stats-overview">
+        <div class="stat-card">
+          <span class="sc-icon">⚡</span>
+          <span class="sc-val" id="sc-xp">0</span>
+          <span class="sc-label">XP Total</span>
+        </div>
+        <div class="stat-card">
+          <span class="sc-icon">✅</span>
+          <span class="sc-val" id="sc-correct">0</span>
+          <span class="sc-label">Acertos</span>
+        </div>
+        <div class="stat-card">
+          <span class="sc-icon">🔥</span>
+          <span class="sc-val" id="sc-streak">0</span>
+          <span class="sc-label">Maior Sequência</span>
+        </div>
+        <div class="stat-card">
+          <span class="sc-icon">📋</span>
+          <span class="sc-val" id="sc-total">0</span>
+          <span class="sc-label">Total Respondido</span>
+        </div>
+      </div>
+
+      <h3 class="section-title">📈 Desempenho por Módulo</h3>
+      <div class="module-stats-list" id="module-stats-list">
+        <!-- Gerado via JS -->
+      </div>
+
+      <h3 class="section-title">🎯 Pontos Fracos — Foque Aqui!</h3>
+      <div class="weak-areas-list" id="weak-areas-list">
+        <!-- Gerado via JS -->
+      </div>
+    </div>
+    <nav class="bottom-nav">
+      <button class="nav-btn" onclick="App.showTab('home')" id="nav-home-s">
+        <span>🏠</span><span>Início</span>
+      </button>
+      <button class="nav-btn active" onclick="App.showTab('stats')" id="nav-stats-s">
+        <span>📊</span><span>Progresso</span>
+      </button>
+      <button class="nav-btn" onclick="App.showTab('rank')" id="nav-rank-s">
+        <span>🏆</span><span>Ranking</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ══ OVERLAY: GAME OVER ══ -->
+  <div id="overlay-gameover" class="overlay" style="display:none">
+    <div class="overlay-card">
+      <div class="overlay-icon">💔</div>
+      <h3>Você perdeu todas as vidas!</h3>
+      <p>Sem corações restantes. Revise o conteúdo e tente de novo!</p>
+      <button class="btn-primary" onclick="App.retryModule()">🔁 Tentar Novamente</button>
+      <button class="btn-secondary" onclick="App.showScreen('screen-home')">🏠 Início</button>
+    </div>
+  </div>
+
+  <!-- ══ OVERLAY: LEVEL UP ══ -->
+  <div id="overlay-levelup" class="overlay" style="display:none">
+    <div class="overlay-card levelup-card">
+      <div class="overlay-icon levelup-anim">🏆</div>
+      <h3>Nível Desbloqueado!</h3>
+      <p id="levelup-text">Você completou este módulo com maestria!</p>
+      <button class="btn-primary" onclick="App.closeLevelUp()">Continuar 🚀</button>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
