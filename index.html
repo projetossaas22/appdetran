@@ -58,6 +58,9 @@
         </div>
       </div>
       <div class="header-right">
+        <button class="sound-toggle-btn" onclick="App.toggleSound()" title="Ativar/Desativar Som" aria-label="Som">
+          <span class="sound-icon">🔊</span>
+        </button>
         <div class="xp-badge">
           <span class="xp-icon">⚡</span>
           <span id="total-xp-display">0 XP</span>
@@ -140,7 +143,12 @@
     <div class="quiz-header">
       <button class="btn-back" id="btn-back-quiz" onclick="App.exitQuiz()">✕</button>
       <div class="quiz-module-name" id="quiz-module-name">Legislação</div>
-      <div class="lives-display" id="lives-display"></div>
+      <div class="quiz-header-right">
+        <button class="sound-toggle-btn sound-small" onclick="App.toggleSound()" title="Som" aria-label="Som">
+          <span class="sound-icon">🔊</span>
+        </button>
+        <div class="lives-display" id="lives-display"></div>
+      </div>
     </div>
 
     <!-- Progress Bar -->
@@ -261,6 +269,11 @@
         <span class="app-logo">📊</span>
         <span class="app-name">Meu Progresso</span>
       </div>
+      <div class="header-right">
+        <button class="sound-toggle-btn" onclick="App.toggleSound()" title="Ativar/Desativar Som" aria-label="Som">
+          <span class="sound-icon">🔊</span>
+        </button>
+      </div>
     </header>
     <div class="stats-content">
       <div class="stats-overview">
@@ -312,6 +325,11 @@
       <div class="header-left">
         <span class="app-logo">🪤</span>
         <span class="app-name">Pegadinhas da Prova</span>
+      </div>
+      <div class="header-right">
+        <button class="sound-toggle-btn" onclick="App.toggleSound()" title="Ativar/Desativar Som" aria-label="Som">
+          <span class="sound-icon">🔊</span>
+        </button>
       </div>
     </header>
     <div class="peg-content">
