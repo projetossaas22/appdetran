@@ -1198,9 +1198,9 @@ const App = (() => {
     },
     {
       tag: 'Legislação',
-      question: 'Em rodovias de pista simples, a velocidade máxima para automóveis é 120 km/h?',
+      question: 'Onde não houver sinalização, a velocidade máxima para automóveis em rodovias de pista simples é 110 km/h?',
       trap: '❌ Armadilha: Confundir o limite de pista simples com o de pista dupla.',
-      answer: '✅ Não! Em pista simples o limite é 100 km/h. 120 km/h é exclusivo para rodovias de pista dupla.'
+      answer: '✅ Não! Em rodovias de pista simples o limite geral é 100 km/h. O limite de 110 km/h aplica-se às rodovias de pista dupla (Art. 61 do CTB).'
     }
   ];
 
