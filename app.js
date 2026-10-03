@@ -1,7 +1,7 @@
 /**
  * DetranQuiz — app.js
  * Método Gabarita Detran
- * Motor do quiz: XP, vidas, sequência, progresso, análise de pontos fracos, termômetro
+ * Motor do quiz: XP, vidas, sequência, progresso, análise de pontos fracos, termômetro e histórico
  */
 
 const App = (() => {
@@ -13,7 +13,6 @@ const App = (() => {
   const SIMULADO_QUESTIONS_COUNT = 52;
   const XP_CORRECT = 10;
   const XP_STREAK_BONUS = [0, 0, 5, 10, 15, 20];
-  const WHATSAPP_URL = 'https://wa.me'; // ← Substitua pelo seu link do WhatsApp / checkout
 
   // ══ ESTADO GLOBAL ═══════════════════════════════════
   let state = {
@@ -29,6 +28,8 @@ const App = (() => {
     lastPlayed: null,
     bestSimuladoScore: 0,
     desafioShown: false,
+    sessionHistory: [],  // Histórico de treinos / simulados concluídos
+    recentAnswers: []    // Histórico detalhado das últimas respostas
   };
 
   let quizState = {
@@ -50,6 +51,8 @@ const App = (() => {
       const toSave = {
         ...state,
         completedModules: [...state.completedModules],
+        sessionHistory: state.sessionHistory || [],
+        recentAnswers: (state.recentAnswers || []).slice(0, 50)
       };
       localStorage.setItem('treina_detran_state', JSON.stringify(toSave));
     } catch (e) {
@@ -66,6 +69,8 @@ const App = (() => {
         ...state,
         ...saved,
         completedModules: new Set(saved.completedModules || []),
+        sessionHistory: saved.sessionHistory || [],
+        recentAnswers: saved.recentAnswers || []
       };
     } catch (e) {
       console.warn('Erro ao carregar state:', e);
@@ -84,15 +89,14 @@ const App = (() => {
     updateGreeting();
     updateThermometerHome();
     renderPegadinhas();
-    updateWALinks();
 
-    // Mostra o desafio na primeira vez que o usuário entra na home
+    // Mostra o desafio interativo na primeira vez que o usuário entra
     if (!state.desafioShown) {
       setTimeout(() => {
         showOverlay('overlay-desafio');
         state.desafioShown = true;
         saveState();
-      }, 1400);
+      }, 1200);
     }
   }
 
@@ -129,7 +133,7 @@ const App = (() => {
     const hour = new Date().getHours();
     let greeting = 'Bora treinar hoje? 💪';
     if (hour < 12) greeting = 'Bom dia! Bora treinar cedo? 🌅';
-    else if (hour < 18) greeting = 'Boa tarde! Hora do treino! ☀️';
+    else if (hour < 18) greeting = 'Boa tarde! Hora de treinar! ☀️';
     else greeting = 'Boa noite! Treino noturno? 🌙';
 
     const el = document.getElementById('greeting-text');
@@ -139,15 +143,9 @@ const App = (() => {
     const sub = document.getElementById('greeting-sub');
     if (sub) {
       sub.textContent = weakTopics.length > 0
-        ? 'Você tem pontos fracos para revisar antes da prova!'
-        : 'Treine, descubra onde erra e chegue aprovada.';
+        ? 'Identificamos matérias recomendadas para você revisar!'
+        : 'Treine com questões da prova, descubra onde erra e chegue aprovada.';
     }
-  }
-
-  function updateWALinks() {
-    document.querySelectorAll('#btn-whatsapp, .btn-whatsapp').forEach(el => {
-      el.href = WHATSAPP_URL;
-    });
   }
 
   function updateThermometerHome() {
@@ -174,7 +172,7 @@ const App = (() => {
 
       const card = document.createElement('div');
       card.className = 'module-card';
-      card.style.setProperty('--mod-color', mod.color);
+      if (card.style?.setProperty) card.style.setProperty('--mod-color', mod.color);
       card.onclick = () => startModule(mod.id);
 
       let badge = '';
@@ -219,18 +217,22 @@ const App = (() => {
     return 0;
   }
 
-  // ══ INICIAR TREINO / SIMULADO ═══════════════════════
+  // ══ INICIAR TREINO / SIMULADO COM PRIORIZAÇÃO DE IMAGENS ══
   function startModule(moduleId) {
     if (typeof MODULES === 'undefined' || typeof QUESTIONS === 'undefined') return;
     const mod = MODULES.find(m => m.id === moduleId);
     if (!mod || !QUESTIONS[moduleId]) return;
 
-    const allQ = QUESTIONS[moduleId];
-    const shuffled = shuffle([...allQ]).slice(0, QUESTIONS_PER_MODULE);
+    const allQ = [...QUESTIONS[moduleId]];
+
+    // 🎯 PRIORIZA QUESTÕES COM IMAGENS PRIMEIRO
+    const withImg = shuffle(allQ.filter(q => !!q.image));
+    const withoutImg = shuffle(allQ.filter(q => !q.image));
+    const prioritized = [...withImg, ...withoutImg].slice(0, QUESTIONS_PER_MODULE);
 
     quizState = {
       moduleId,
-      questions: shuffled,
+      questions: prioritized,
       currentIndex: 0,
       lives: MAX_LIVES,
       correct: 0,
@@ -260,11 +262,15 @@ const App = (() => {
     });
 
     const targetCount = Math.min(SIMULADO_QUESTIONS_COUNT, all.length);
-    const shuffled = shuffle(all).slice(0, targetCount);
+
+    // 🎯 PRIORIZA QUESTÕES COM IMAGENS PRIMEIRO
+    const withImg = shuffle(all.filter(q => !!q.image));
+    const withoutImg = shuffle(all.filter(q => !q.image));
+    const prioritized = [...withImg, ...withoutImg].slice(0, targetCount);
 
     quizState = {
       moduleId: 'simulado',
-      questions: shuffled,
+      questions: prioritized,
       currentIndex: 0,
       lives: MAX_LIVES,
       correct: 0,
@@ -303,7 +309,7 @@ const App = (() => {
     const q = questions[currentIndex];
     const total = questions.length;
 
-    // Barra de progresso do quiz
+    // Barra de progresso
     const pct = Math.round((currentIndex / total) * 100);
     const fillEl = document.getElementById('quiz-progress-fill');
     if (fillEl) fillEl.style.width = pct + '%';
@@ -320,7 +326,7 @@ const App = (() => {
     const tagEl = document.getElementById('question-tag');
     if (tagEl) {
       tagEl.textContent = mod ? mod.name : 'Simulado DETRAN';
-      tagEl.style.setProperty('--tag-color', mod ? mod.color : 'var(--primary)');
+      if (tagEl.style?.setProperty) tagEl.style.setProperty('--tag-color', mod ? mod.color : 'var(--primary)');
     }
 
     // Texto da questão
@@ -333,7 +339,7 @@ const App = (() => {
     if (imgWrap && img) {
       if (q.image) {
         img.src = q.image;
-        imgWrap.style.display = 'block';
+        imgWrap.style.display = 'flex';
       } else {
         imgWrap.style.display = 'none';
         img.src = '';
@@ -370,7 +376,7 @@ const App = (() => {
       fp.className = 'feedback-panel';
     }
 
-    // Animação suave do card da questão
+    // Animação suave
     const card = document.getElementById('question-card');
     if (card) {
       card.style.animation = 'none';
@@ -378,12 +384,12 @@ const App = (() => {
       card.style.animation = 'fadeIn 0.25s ease';
     }
 
-    // Rola o quiz para o topo ao mudar de questão
+    // Rola para o topo da questão
     const quizBody = document.getElementById('quiz-body');
     if (quizBody) quizBody.scrollTop = 0;
   }
 
-  // ══ SELEÇÃO DE RESPOSTA ═════════════════════════════
+  // ══ SELEÇÃO DE RESPOSTA & HISTÓRICO ═════════════════
   function selectAnswer(selectedIndex, q) {
     if (quizState.answered) return;
     quizState.answered = true;
@@ -393,7 +399,7 @@ const App = (() => {
 
     buttons.forEach(btn => (btn.disabled = true));
 
-    // Estilos visuais de acerto / erro
+    // Estilos visuais
     if (buttons[selectedIndex]) {
       buttons[selectedIndex].classList.add(isCorrect ? 'correct' : 'wrong');
     }
@@ -401,7 +407,30 @@ const App = (() => {
       buttons[q.correct].classList.add('correct');
     }
 
-    // Atualização das métricas
+    // Identificação do módulo
+    const mid = q.moduleId || quizState.moduleId;
+    const mod = (typeof MODULES !== 'undefined') ? MODULES.find(m => m.id === mid) : null;
+    const modName = mod ? mod.name : 'Simulado Oficial';
+
+    // 💾 GRAVAÇÃO NO HISTÓRICO DE RESPOSTAS DO USUÁRIO
+    const now = new Date();
+    const answerLog = {
+      id: Date.now() + Math.random(),
+      questionText: q.text,
+      moduleName: modName,
+      userAnswer: q.options[selectedIndex],
+      correctAnswer: q.options[q.correct],
+      isCorrect: isCorrect,
+      explanation: q.explanation,
+      date: now.toLocaleDateString('pt-BR'),
+      time: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    };
+
+    if (!state.recentAnswers) state.recentAnswers = [];
+    state.recentAnswers.unshift(answerLog);
+    if (state.recentAnswers.length > 60) state.recentAnswers.pop();
+
+    // Atualização de métricas
     if (isCorrect) {
       quizState.correct++;
       quizState.sessionStreak++;
@@ -421,7 +450,7 @@ const App = (() => {
         question: q.text,
         yourAnswer: q.options[selectedIndex],
         correctAnswer: q.options[q.correct],
-        moduleId: q.moduleId || quizState.moduleId,
+        moduleId: mid,
       });
     }
 
@@ -430,7 +459,6 @@ const App = (() => {
     state.dailyAnswered++;
 
     // Estatísticas por módulo
-    const mid = q.moduleId || quizState.moduleId;
     if (mid && mid !== 'simulado') {
       if (!state.moduleStats[mid]) state.moduleStats[mid] = { correct: 0, wrong: 0, attempts: 0 };
       state.moduleStats[mid].attempts++;
@@ -444,7 +472,7 @@ const App = (() => {
     renderLives();
     showFeedback(isCorrect, q);
 
-    // Se acabou as vidas
+    // Se acabaram as vidas
     if (quizState.lives <= 0 && !isCorrect) {
       setTimeout(() => {
         showGameOver();
@@ -452,6 +480,7 @@ const App = (() => {
     }
   }
 
+  // ══ FEEDBACK DETALHADO E DIDÁTICO ═══════════════════
   function showFeedback(isCorrect, q) {
     const panel = document.getElementById('feedback-panel');
     if (!panel) return;
@@ -463,22 +492,33 @@ const App = (() => {
     if (iconEl) iconEl.textContent = isCorrect ? '✅' : '❌';
 
     const titleEl = document.getElementById('feedback-title');
-    if (titleEl) titleEl.textContent = isCorrect ? getCorrectMessage() : 'Resposta incorreta';
+    if (titleEl) {
+      titleEl.textContent = isCorrect
+        ? getCorrectMessage()
+        : 'Atenção! Você marcou a alternativa errada:';
+    }
 
     const textEl = document.getElementById('feedback-text');
-    if (textEl) textEl.textContent = q.explanation;
+    if (textEl) {
+      // Formatação rica da explicação
+      let expl = q.explanation || '';
+      textEl.innerHTML = `
+        <div class="feedback-explanation">
+          <p>${expl}</p>
+        </div>
+      `;
+    }
 
-    // Rola até o feedback para garantir visibilidade no celular
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function getCorrectMessage() {
     const msgs = [
-      'Correto! 🎯',
+      'Correto! Resposta certeira! 🎯',
       'Boa! Você acertou! 🚀',
-      'Perfeito! 💪',
-      'Excelente! ⭐',
-      'Isso aí! Continue assim! 🔥',
+      'Perfeito! Conhecimento de gabarito! 💪',
+      'Excelente! Ponto para sua CNH! ⭐',
+      'Isso aí! Sem cair na pegadinha! 🔥',
       'Mandou muito bem! 🏆',
     ];
     return msgs[Math.floor(Math.random() * msgs.length)];
@@ -534,10 +574,28 @@ const App = (() => {
       updateThermometerHome();
     }
 
+    const mod = (typeof MODULES !== 'undefined') ? MODULES.find(m => m.id === moduleId) : null;
+    const sessionTitle = isSimulado ? 'Simulado Oficial (52 Q)' : (mod ? mod.name : 'Módulo de Treino');
+
+    // 💾 GRAVA SESSÃO CONCLUÍDA NO HISTÓRICO
+    const sessionRecord = {
+      id: Date.now(),
+      title: sessionTitle,
+      correct: correct,
+      total: total,
+      pct: pct,
+      date: new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      isSimulado: isSimulado
+    };
+
+    if (!state.sessionHistory) state.sessionHistory = [];
+    state.sessionHistory.unshift(sessionRecord);
+    if (state.sessionHistory.length > 30) state.sessionHistory.pop();
+
     const newStars = getModuleStars(pct);
     saveState();
 
-    // Preenche estatísticas
+    // Preenche estatísticas do resultado
     const rsCorrect = document.getElementById('rs-correct');
     if (rsCorrect) rsCorrect.textContent = correct;
 
@@ -555,19 +613,19 @@ const App = (() => {
     if (pct >= 90) {
       emoji = '🏆';
       title = 'GABARITOU! Incrível!';
-      subtitle = 'Você está 100% pronta para a prova real do DETRAN!';
+      subtitle = 'Você está 100% pronta para ser aprovada na prova oficial do DETRAN!';
     } else if (pct >= 70) {
       emoji = '🎉';
       title = 'APROVADA!';
-      subtitle = 'Desempenho aprovado! Mantenha o ritmo até o dia da prova.';
+      subtitle = 'Desempenho aprovado! Você já passa na nota de corte do DETRAN.';
     } else if (pct >= 50) {
       emoji = '📚';
       title = 'Quase lá!';
-      subtitle = 'Mais um pouco de treino e você atinge a nota de corte (70%).';
+      subtitle = 'Mais uma rodada de treino neste módulo e você atinge os 70%.';
     } else {
       emoji = '💡';
       title = 'Vamos treinar mais!';
-      subtitle = 'Revise os conteúdos recomendados e tente novamente.';
+      subtitle = 'Revise os conteúdos das questões erradas e tente novamente.';
     }
 
     const resEmoji = document.getElementById('result-emoji');
@@ -598,10 +656,10 @@ const App = (() => {
       if (scoreEl) scoreEl.textContent = `${correct}/52`;
 
       let thermoMsg = 'Continue treinando!';
-      if (correct >= 50) thermoMsg = 'GABARITANDO! Você está no nível máximo de aprovação! 🏆';
+      if (correct >= 50) thermoMsg = 'GABARITANDO! Nível máximo de aprovação! 🏆';
       else if (correct >= 44) thermoMsg = 'Excelente! Acima de 85% de acertos na prova real. 🚀';
-      else if (correct >= 37) thermoMsg = 'Aprovada! Acima dos 70% mínimos do DETRAN. 💪';
-      else if (correct >= 30) thermoMsg = 'Na trave! Precisa de mais algumas questões para garantir. ⚠️';
+      else if (correct >= 37) thermoMsg = 'Aprovada! Acima dos 70% mínimos exigidos pelo DETRAN. 💪';
+      else if (correct >= 30) thermoMsg = 'Na trave! Mais alguns treinos e você garante a aprovação. ⚠️';
       else thermoMsg = 'Abaixo da média da prova. Foque nos módulos e nas pegadinhas!';
 
       const msgEl = document.getElementById('thermo-result-msg');
@@ -672,7 +730,7 @@ const App = (() => {
     document.querySelectorAll('.overlay').forEach(o => (o.style.display = 'none'));
   }
 
-  // ══ ESTATÍSTICAS E PONTOS FRACOS ════════════════════
+  // ══ ESTATÍSTICAS E HISTÓRICO ════════════════════════
   function renderStats() {
     const xpEl = document.getElementById('sc-xp');
     if (xpEl) xpEl.textContent = state.xp;
@@ -718,7 +776,7 @@ const App = (() => {
       if (weakTopics.length === 0) {
         weakList.innerHTML = `
           <p style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">
-            🎯 Nenhum ponto fraco crítico detectado ainda! Continue respondendo simulados.
+            🎯 Nenhum ponto fraco crítico detectado ainda! Continue respondendo aos simulados.
           </p>`;
       } else {
         weakTopics.forEach(({ mod, pct }) => {
@@ -735,6 +793,80 @@ const App = (() => {
           weakList.appendChild(item);
         });
       }
+    }
+
+    // 🕒 RENDERIZAÇÃO DO HISTÓRICO DE TREINOS E RESPOSTAS
+    renderHistorySection();
+  }
+
+  function renderHistorySection() {
+    const historyContainer = document.getElementById('history-list');
+    if (!historyContainer) return;
+    historyContainer.innerHTML = '';
+
+    const sessions = state.sessionHistory || [];
+    const recentAnswers = state.recentAnswers || [];
+
+    if (sessions.length === 0 && recentAnswers.length === 0) {
+      historyContainer.innerHTML = `
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);padding:20px;text-align:center;">
+          <p style="color:var(--text-muted);font-size:13px;">Você ainda não possui treinos registrados. Seus resultados e respostas aparecerão aqui automaticamente após responder!</p>
+        </div>
+      `;
+      return;
+    }
+
+    // 1. Sessões Concluídas Recentes
+    if (sessions.length > 0) {
+      const sessionBlock = document.createElement('div');
+      sessionBlock.innerHTML = `<h4 style="font-size:13px;font-weight:700;color:var(--primary-light);margin-bottom:8px;">📊 Treinos Concluídos Recentemente:</h4>`;
+      
+      sessions.slice(0, 5).forEach(s => {
+        const isApproved = s.pct >= 70;
+        const card = document.createElement('div');
+        card.className = 'history-session-card';
+        card.innerHTML = `
+          <div class="hsc-top">
+            <span class="hsc-title">${s.title}</span>
+            <span class="hsc-badge ${isApproved ? 'approved' : 'review'}">${isApproved ? 'Aprovada ✓' : 'Em Treino'}</span>
+          </div>
+          <div class="hsc-details">
+            <span>${s.correct}/${s.total} acertos (${s.pct}%)</span>
+            <span>${s.date}</span>
+          </div>
+        `;
+        sessionBlock.appendChild(card);
+      });
+      historyContainer.appendChild(sessionBlock);
+    }
+
+    // 2. Últimas Respostas Registradas
+    if (recentAnswers.length > 0) {
+      const answersBlock = document.createElement('div');
+      answersBlock.style.marginTop = '14px';
+      answersBlock.innerHTML = `<h4 style="font-size:13px;font-weight:700;color:var(--primary-light);margin-bottom:8px;">📝 Últimas Questões Respondidas:</h4>`;
+
+      recentAnswers.slice(0, 10).forEach(a => {
+        const item = document.createElement('div');
+        item.className = 'history-q-item ' + (a.isCorrect ? 'correct' : 'wrong');
+        item.innerHTML = `
+          <div class="hqi-question">${a.isCorrect ? '✅' : '❌'} <strong>[${a.moduleName}]</strong> ${a.questionText.substring(0, 75)}...</div>
+          <div class="hqi-answer">Sua resposta: <em>${a.userAnswer}</em></div>
+          ${!a.isCorrect ? `<div class="hqi-answer" style="color:var(--accent-green)">Correta: ${a.correctAnswer}</div>` : ''}
+          <div class="hqi-time">${a.date} às ${a.time}</div>
+        `;
+        answersBlock.appendChild(item);
+      });
+      historyContainer.appendChild(answersBlock);
+    }
+  }
+
+  function clearHistory() {
+    if (confirm('Deseja limpar todo o histórico de treinos e respostas salvas?')) {
+      state.sessionHistory = [];
+      state.recentAnswers = [];
+      saveState();
+      renderStats();
     }
   }
 
@@ -792,7 +924,7 @@ const App = (() => {
       tag: 'Legislação',
       question: 'O motorista pode usar o celular no viva-voz enquanto dirige?',
       trap: '❌ Armadilha: Muita gente acha que viva-voz libera o uso.',
-      answer: '✅ Não! Qualquer uso de celular ao volante sem suporte fixo e mãos livres é infração gravíssima.'
+      answer: '✅ Não! Qualquer manuseio de celular ao volante sem suporte fixo e mãos livres é infração gravíssima.'
     },
     {
       tag: 'Infrações',
@@ -940,6 +1072,7 @@ const App = (() => {
     exitQuiz,
     retryModule,
     closeLevelUp,
+    clearHistory,
   };
 })();
 
