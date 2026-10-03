@@ -1,6 +1,12 @@
 # 🎨 Prompts para Geração de Imagens — TreinaDETRAN
 # Use no ChatGPT (DALL-E 3) para criar todas as imagens do app
-# Cada bloco começa com "Crie 10 imagens..."
+# Cada bloco termina com instrução para baixar o ZIP
+
+---
+
+## FAVICON DO APP
+
+Crie 1 imagem de favicon para o app TreinaDETRAN. Tamanho 512x512px (quadrado), para ser usado como ícone do site e favicon. Design: ícone de carro esportivo visto de frente levemente estilizado, cor laranja neon (#FF6B00) com contorno branco, fundo quadrado arredondado preto (#0E0E12), sem texto, sem bordas extras. Estilo flat design moderno, bold e reconhecível em tamanho pequeno (32x32px). Gera um zip com todas só pra eu clicar e baixar.
 
 ---
 
@@ -18,6 +24,8 @@ Crie 10 imagens vetorizadas de ícones estilo flat design moderno para um app de
 9. Cruz médica vermelha estilizada (primeiros socorros)
 10. Chave inglesa + engrenagem (mecânica básica)
 
+Gera um zip com todas só pra eu clicar e baixar.
+
 ---
 
 ## BATCH 2 — Ilustrações para Questões de Placas
@@ -33,6 +41,8 @@ Crie 10 imagens de placas de trânsito brasileiras estilo ilustração vetorial 
 8. Placa de Advertência Lombada (losango amarelo com ondulação) — legenda: "A-27 Lombada"
 9. Placa de Indicação de Destino (retângulo verde com seta branca) — legenda: "Indicação de Destino"
 10. Placa Proibido Estacionar (círculo azul com P riscado em vermelho) — legenda: "R-6a Proibido Estacionar"
+
+Gera um zip com todas só pra eu clicar e baixar.
 
 ---
 
@@ -50,6 +60,8 @@ Crie 10 ilustrações estilo cartoon moderno e vibrante (sem rostos realistas) d
 9. Motorista verificando calibragem dos pneus com manômetro — infográfico educativo
 10. Vista interna do painel do carro com ícones de alertas iluminados (óleo, temperatura, bateria)
 
+Gera um zip com todas só pra eu clicar e baixar.
+
 ---
 
 ## BATCH 4 — Banner e Tela Inicial do App
@@ -66,6 +78,8 @@ Crie 10 variações de design para a tela de splash (carregamento) de um app mob
 9. Cena noturna de cidade brasileira com carros e placa de estrada ao fundo
 10. Logo do app com ícone de carro + raio, glitch effect neon laranja sobre fundo preto
 
+Gera um zip com todas só pra eu clicar e baixar.
+
 ---
 
 ## BATCH 5 — Conquistas e Recompensas (Gamificação)
@@ -78,9 +92,11 @@ Crie 10 ilustrações de medalhas, troféus e insígnias para o sistema de recom
 5. Medalha "Simulado Aprovado" — placa de aprovado estilo DETRAN estilizado
 6. Insígnia "Aprendiz Veloz" — velocímetro com ponteiro no máximo
 7. Troféu "Diretor da Estrada" — volante com coroa dourada
-8. Badge "Resgistrou 100 questões" — pergunta com número 100 em neon
+8. Badge "Respondeu 100 questões" — pergunta com número 100 em neon
 9. Medalha "Direção Defensiva Pro" — escudo azul com carro protegido dentro
 10. Insígnia "Mecânico Curioso" — engrenagem com coração no centro
+
+Gera um zip com todas só pra eu clicar e baixar.
 
 ---
 
@@ -98,3 +114,4 @@ Crie 10 infográficos educativos estilo cards modernos para um app de preparaç�
 9. "Quando usar cada farol" — noite, chuva, neblina, túnel — guia visual
 10. "Pontos na CNH" — linha do tempo de 0 a 40 pontos com zonas de alerta vermelho
 
+Gera um zip com todas só pra eu clicar e baixar.
