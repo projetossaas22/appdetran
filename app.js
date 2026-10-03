@@ -1,6 +1,7 @@
 /**
- * TreinaDETRAN — app.js
- * Motor do quiz: XP, vidas, sequência, progresso, análise de pontos fracos
+ * DetranQuiz — app.js
+ * Método Gabarita Detran
+ * Motor do quiz: XP, vidas, sequência, progresso, análise de pontos fracos, termômetro
  */
 
 const App = (() => {
@@ -10,19 +11,22 @@ const App = (() => {
   const MAX_LIVES = 5;
   const QUESTIONS_PER_MODULE = 10;
   const XP_CORRECT = 10;
-  const XP_STREAK_BONUS = [0, 0, 5, 10, 15, 20]; // bônus a partir de 2 acertos seguidos
+  const XP_STREAK_BONUS = [0, 0, 5, 10, 15, 20];
+  const WHATSAPP_URL = 'https://wa.me'; // ← substitua pelo link real do WhatsApp
 
   let state = {
     xp: 0,
-    streak: 0,       // sequência atual
+    streak: 0,
     bestStreak: 0,
     totalCorrect: 0,
     totalAnswered: 0,
     dailyAnswered: 0,
     dailyGoal: 10,
-    moduleStats: {},  // { moduleId: { correct, wrong, attempts } }
+    moduleStats: {},
     completedModules: new Set(),
     lastPlayed: null,
+    bestSimuladoScore: 0,  // melhor pontuação no quiz de 52
+    desafioShown: false,
   };
 
   let quizState = {
@@ -72,6 +76,18 @@ const App = (() => {
     updateDailyGoal();
     updateWeakAlert();
     updateGreeting();
+    updateThermometerHome();
+    renderPegadinhas();
+    updateWALinks();
+
+    // Mostra o desafio na primeira vez que o usuário entra na home
+    if (!state.desafioShown) {
+      setTimeout(() => {
+        document.getElementById('overlay-desafio').style.display = 'flex';
+        state.desafioShown = true;
+        saveState();
+      }, 1200);
+    }
   }
 
   function checkDailyReset() {
@@ -117,7 +133,22 @@ const App = (() => {
     if (sub) {
       sub.textContent = weakTopics.length > 0
         ? `Você tem pontos fracos para melhorar!`
-        : 'Escolha um módulo para começar';
+        : 'Treine, descubra onde erra e chegue aprovada.';
+    }
+  }
+
+  function updateWALinks() {
+    document.querySelectorAll('#btn-whatsapp, .btn-whatsapp').forEach(el => {
+      el.href = WHATSAPP_URL;
+    });
+  }
+
+  function updateThermometerHome() {
+    const el = document.getElementById('thermo-score-home');
+    if (el) {
+      el.textContent = state.bestSimuladoScore > 0
+        ? `${state.bestSimuladoScore}/52`
+        : '—/52';
     }
   }
 
@@ -434,12 +465,15 @@ const App = (() => {
     const total = correct + wrong;
     const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
 
-    // Mark as completed if passed
     if (pct >= 70 && !isSimulado) {
       state.completedModules.add(moduleId);
     }
 
-    // Level up check
+    // Atualiza melhor pontuação do simulado (termômetro)
+    if (isSimulado && correct > state.bestSimuladoScore) {
+      state.bestSimuladoScore = correct;
+    }
+
     const oldStars = getModuleStars(
       state.moduleStats[moduleId]
         ? Math.round((state.moduleStats[moduleId].correct / (state.moduleStats[moduleId].correct + state.moduleStats[moduleId].wrong)) * 100)
@@ -458,9 +492,9 @@ const App = (() => {
 
     // Emoji & title
     let emoji, title, subtitle;
-    if (pct >= 90) { emoji = '🏆'; title = 'Nota 10! Incrível!'; subtitle = 'Você está mais que pronto!'; }
-    else if (pct >= 70) { emoji = '🎉'; title = 'Aprovado!'; subtitle = 'Ótimo desempenho! Continue assim.'; }
-    else if (pct >= 50) { emoji = '📚'; title = 'Quase lá!'; subtitle = 'Você precisa de mais treino neste módulo.'; }
+    if (pct >= 90) { emoji = '🏆'; title = 'Nota 10! Incrível!'; subtitle = 'Você está mais que pronta!'; }
+    else if (pct >= 70) { emoji = '🎉'; title = 'Aprovada!'; subtitle = 'Ótimo desempenho! Continue assim.'; }
+    else if (pct >= 50) { emoji = '📚'; title = 'Quase lá!'; subtitle = 'Mais treino neste módulo e você passa.'; }
     else { emoji = '💡'; title = 'Vamos revisar!'; subtitle = 'Estude mais este conteúdo e tente de novo.'; }
 
     document.getElementById('result-emoji').textContent = emoji;
@@ -472,16 +506,41 @@ const App = (() => {
     ['star1', 'star2', 'star3'].forEach((id, i) => {
       const el = document.getElementById(id);
       el.className = 'star';
-      if (i < starCount) {
-        setTimeout(() => el.classList.add('lit'), 400 + i * 300);
-      }
+      if (i < starCount) setTimeout(() => el.classList.add('lit'), 400 + i * 300);
     });
+
+    // Painel do termômetro (só no simulado de 52)
+    const thermoCard = document.getElementById('thermo-result-card');
+    if (isSimulado && thermoCard) {
+      thermoCard.style.display = 'flex';
+      document.getElementById('thermo-result-score').textContent = `${correct}/52`;
+
+      // Mensagem do termômetro
+      let thermoMsg = 'Continue treinando!';
+      if (correct >= 52) thermoMsg = 'GABARITOU! Você está mais do que pronta! 🏆';
+      else if (correct >= 45) thermoMsg = 'Excelente! Praticamente gabaritando. (~95% na prova)';
+      else if (correct >= 40) thermoMsg = 'Ótimo! Quase aprovada com folga. (~80% na prova)';
+      else if (correct >= 30) thermoMsg = 'Você está na média. Não pare! (~60% na prova)';
+      else thermoMsg = 'Ainda precisa de bastante treino. Vamos lá!';
+
+      document.getElementById('thermo-result-msg').textContent = thermoMsg;
+
+      // Barra
+      setTimeout(() => {
+        const pctBar = (correct / 52) * 100;
+        document.getElementById('thermo-bar-fill').style.width = pctBar + '%';
+      }, 600);
+    } else if (thermoCard) {
+      thermoCard.style.display = 'none';
+    }
 
     // XP bar
     const xpPct = Math.min((state.xp / 1000) * 100, 100);
     setTimeout(() => {
-      document.getElementById('xp-bar-result').style.width = xpPct + '%';
-      document.getElementById('xp-val-result').textContent = state.xp + ' XP';
+      const xpBar = document.getElementById('xp-bar-result');
+      if (xpBar) xpBar.style.width = xpPct + '%';
+      const xpVal = document.getElementById('xp-val-result');
+      if (xpVal) xpVal.textContent = state.xp + ' XP';
     }, 600);
 
     // Wrong items review
@@ -490,7 +549,7 @@ const App = (() => {
       const list = document.getElementById('wrong-list');
       list.innerHTML = wrongItems.map(w => `
         <div class="wrong-item">
-          <strong>${w.question.substring(0, 60)}...</strong><br/>
+          <strong>${w.question.substring(0, 70)}...</strong><br/>
           Sua resposta: ${w.yourAnswer}<br/>
           Correta: ${w.correctAnswer}
         </div>
@@ -501,7 +560,6 @@ const App = (() => {
 
     showScreen('screen-result');
 
-    // Level up overlay
     if (leveledUp) {
       setTimeout(() => {
         const mod = MODULES.find(m => m.id === moduleId);
@@ -512,8 +570,87 @@ const App = (() => {
     }
   }
 
+  // ══ PEGADINHAS ═══════════════════════════════════════
+  const PEGADINHAS = [
+    {
+      tag: 'Legislação',
+      question: 'O motorista pode usar o celular no viva-voz enquanto dirige?',
+      trap: '❌ Armadilha: Muita gente acha que viva-voz libera o uso.',
+      answer: '✅ Não! Qualquer uso de celular ao volante é infração gravisssima, inclusive viva-voz sem suporte fixo.'
+    },
+    {
+      tag: 'Infrações',
+      question: 'Parar no semáforo vermelho sobre a faixa de pedestres é permitido se não houver ninguém cruzando?',
+      trap: '❌ Armadilha: Parece inofensivo quando não tem pedestre.',
+      answer: '✅ Não! É proibido parar sobre a faixa de pedestres em qualquer situação. Infração média.'
+    },
+    {
+      tag: 'Legislação',
+      question: 'CNH vencida é diferente de dirigir sem habilitação?',
+      trap: '❌ Armadilha: São coisas diferentes? Não!',
+      answer: '✅ Para o CTB, ambas são infrações gravissimas com as mesmas penalidades: multa + veículo recolhido.'
+    },
+    {
+      tag: 'Placas',
+      question: 'A placa “Dê a Preferência” é circular como as outras placas de regulamentação?',
+      trap: '❌ Armadilha: A maioria das regulamentações é circular.',
+      answer: '✅ Não! É triangular com borda vermelha — única placa de regulamentação com esse formato.'
+    },
+    {
+      tag: 'Direção Defensiva',
+      question: 'Em caso de aquaplanagem, o correto é frear com força para parar mais rápido?',
+      trap: '❌ Armadilha: Instinto natural é frear.',
+      answer: '✅ Não! Frear bruscamente piora. Solte o acelerador suavemente e mantenha o volante firme até recuperar aderência.'
+    },
+    {
+      tag: 'Infrações',
+      question: 'Os pontos na CNH somem depois de pagar a multa?',
+      trap: '❌ Armadilha: Muita gente paga achando que zera os pontos.',
+      answer: '✅ Não! Os pontos só somem após 12 meses da data da infração, independente do pagamento da multa.'
+    },
+    {
+      tag: 'Primeiros Socorros',
+      question: 'Ao encontrar uma vítima de acidente, devo removê-la do veículo imediatamente para socorrê-la?',
+      trap: '❌ Armadilha: Parece que tirar do local é a coisa certa.',
+      answer: '✅ Não! Só mova a vítima se houver risco imediato de vida no local (fogo, afogamento). Mover errado pode causar paralisia.'
+    },
+    {
+      tag: 'Legislação',
+      question: 'Em rodovias de pista simples, a velocidade máxima para carro é 120 km/h?',
+      trap: '❌ Armadilha: Confunde com pista dupla.',
+      answer: '✅ Não! Em pista simples o limite é 100 km/h. 120 km/h é o limite apenas em pistas duplas.'
+    },
+  ];
+
+  function renderPegadinhas() {
+    const list = document.getElementById('peg-list');
+    if (!list) return;
+    list.innerHTML = PEGADINHAS.map((p, i) => `
+      <div class="peg-item">
+        <div class="peg-item-header">
+          <div class="peg-num">${i + 1}</div>
+          <div class="peg-tag">${p.tag}</div>
+        </div>
+        <div class="peg-question">❓ ${p.question}</div>
+        <div class="peg-trap">${p.trap}</div>
+        <div class="peg-answer">${p.answer}</div>
+      </div>
+    `).join('');
+  }
+    showOverlay('overlay-gameover');
+  }
+
   function showGameOver() {
     showOverlay('overlay-gameover');
+  }
+
+  function dismissDesafio() {
+    hideAllOverlays();
+  }
+
+  function startSimuladoFromDesafio() {
+    hideAllOverlays();
+    startSimulado();
   }
 
   function retryModule() {
@@ -662,9 +799,8 @@ const App = (() => {
       showScreen('screen-home');
     } else if (tab === 'stats') {
       showScreen('screen-stats');
-    } else if (tab === 'rank') {
-      // Placeholder ranking
-      alert('🏆 Ranking em breve! Continue acumulando XP.');
+    } else if (tab === 'pegadinhas') {
+      showScreen('screen-pegadinhas');
     }
   }
 
@@ -692,6 +828,8 @@ const App = (() => {
     showTab,
     startModule,
     startSimulado,
+    startSimuladoFromDesafio,
+    dismissDesafio,
     nextQuestion,
     exitQuiz,
     retryModule,
