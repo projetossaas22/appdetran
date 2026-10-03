@@ -367,6 +367,44 @@ body {
   font-weight: 700;
 }
 
+.sound-toggle-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--r-full);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: transform var(--t-fast), background var(--t-fast);
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+.sound-toggle-btn:hover {
+  transform: scale(1.1);
+  background: var(--bg-card-hover);
+}
+
+.sound-toggle-btn:active {
+  transform: scale(0.92);
+}
+
+.sound-toggle-btn.sound-small {
+  width: 32px;
+  height: 32px;
+  font-size: 13px;
+}
+
+.quiz-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .xp-badge { color: var(--accent); }
 .streak-badge { color: var(--primary-light); }
 
@@ -708,10 +746,54 @@ body {
   color: var(--text-primary);
 }
 
+.quiz-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .lives-display {
   display: flex;
   gap: 4px;
-  font-size: 22px;
+  font-size: 20px;
+}
+
+.heart-icon {
+  display: inline-block;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Sound Toggle Button */
+.sound-toggle-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--text-primary);
+  transition: transform var(--t-fast), background var(--t-fast), border-color var(--t-fast);
+  flex-shrink: 0;
+}
+
+.sound-toggle-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-accent);
+  transform: scale(1.08);
+}
+
+.sound-toggle-btn:active {
+  transform: scale(0.92);
+}
+
+.sound-toggle-btn.sound-small {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
 }
 
 /* Quiz progress bar */
