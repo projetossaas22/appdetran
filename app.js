@@ -1,7 +1,7 @@
 /**
  * DetranQuiz — app.js
  * Método Gabarita Detran
- * Motor do quiz: XP, vidas, sequência, progresso, análise de pontos fracos, termômetro e histórico
+ * Motor do quiz: XP, vidas, sequência, progresso, análise de pontos fracos, termômetro, histórico e efeitos sonoros gamificados
  */
 
 const App = (() => {
@@ -13,6 +13,175 @@ const App = (() => {
   const SIMULADO_QUESTIONS_COUNT = 52;
   const XP_CORRECT = 10;
   const XP_STREAK_BONUS = [0, 0, 5, 10, 15, 20];
+
+  // ══ ENGINE DE EFEITOS SONOROS (WEB AUDIO API GAMIFICADA) ══
+  const Sound = (() => {
+    let ctx = null;
+    let enabled = true;
+
+    try {
+      const saved = localStorage.getItem('treina_detran_sound_enabled');
+      if (saved !== null) enabled = saved === '1';
+    } catch (e) {}
+
+    function initCtx() {
+      if (!ctx && (typeof window !== 'undefined')) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) ctx = new AudioCtx();
+      }
+      if (ctx && ctx.state === 'suspended') {
+        ctx.resume();
+      }
+    }
+
+    function playTone(freq, type = 'sine', duration = 0.15, startTime = 0, gainLevel = 0.15) {
+      if (!enabled) return;
+      try {
+        initCtx();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        const t = ctx.currentTime + startTime;
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.001, t);
+        gain.gain.linearRampToValueAtTime(gainLevel, t + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + duration);
+      } catch (e) {}
+    }
+
+    // 1. Acerto comum (Acorde maior alegre e brilhante)
+    function playCorrect() {
+      if (!enabled) return;
+      initCtx();
+      playTone(523.25, 'triangle', 0.12, 0.00, 0.22); // C5
+      playTone(659.25, 'triangle', 0.14, 0.08, 0.22); // E5
+      playTone(783.99, 'triangle', 0.16, 0.16, 0.25); // G5
+      playTone(1046.50, 'sine', 0.35, 0.24, 0.30); // C6
+    }
+
+    // 2. Erro (Tom suave descendente, estilo Duolingo amigável)
+    function playWrong() {
+      if (!enabled) return;
+      initCtx();
+      playTone(300, 'sine', 0.16, 0.0, 0.25);
+      playTone(210, 'sine', 0.28, 0.12, 0.22);
+    }
+
+    // 3. Sequência / Combo em Chamas (Raios de XP e energia!)
+    function playStreak() {
+      if (!enabled) return;
+      initCtx();
+      playTone(440.00, 'triangle', 0.08, 0.00, 0.20);
+      playTone(554.37, 'triangle', 0.08, 0.06, 0.22);
+      playTone(659.25, 'triangle', 0.10, 0.12, 0.25);
+      playTone(880.00, 'sine', 0.25, 0.18, 0.30);
+      playTone(1174.66, 'sine', 0.40, 0.26, 0.32);
+    }
+
+    // 4. Clique tátil nos botões e abas
+    function playClick() {
+      if (!enabled) return;
+      initCtx();
+      playTone(750, 'sine', 0.035, 0.0, 0.09);
+    }
+
+    // 5. Fanfarra de Vitória (Aprovada no Simulado / Módulo com >= 70%!)
+    function playVictory() {
+      if (!enabled) return;
+      initCtx();
+      const notes = [523.25, 659.25, 783.99, 1046.50];
+      notes.forEach((freq, i) => {
+        playTone(freq, 'triangle', 0.15, i * 0.1, 0.22);
+      });
+      setTimeout(() => {
+        playTone(1046.50, 'sine', 0.65, 0, 0.35);
+        playTone(1318.51, 'triangle', 0.65, 0, 0.25);
+      }, 450);
+    }
+
+    // 6. Game Over (Sem corações restantes)
+    function playGameOver() {
+      if (!enabled) return;
+      initCtx();
+      playTone(330, 'sine', 0.22, 0.0, 0.22);
+      playTone(293, 'sine', 0.22, 0.2, 0.22);
+      playTone(261, 'sine', 0.22, 0.4, 0.22);
+      playTone(220, 'sine', 0.55, 0.6, 0.26);
+    }
+
+    // 7. Meta Diária Cumprida / Conquista (Sino cintilante de vitória diária)
+    function playGoal() {
+      if (!enabled) return;
+      initCtx();
+      playTone(587.33, 'triangle', 0.12, 0.0, 0.22); // D5
+      playTone(739.99, 'triangle', 0.12, 0.1, 0.24); // F#5
+      playTone(880.00, 'triangle', 0.15, 0.2, 0.25); // A5
+      playTone(1174.66, 'sine', 0.50, 0.3, 0.32); // D6
+    }
+
+    // 8. Incentivo / Tente Novamente (< 70% de acertos)
+    function playEncourage() {
+      if (!enabled) return;
+      initCtx();
+      playTone(440.00, 'sine', 0.18, 0.0, 0.2); // A4
+      playTone(493.88, 'sine', 0.18, 0.14, 0.2); // B4
+      playTone(523.25, 'sine', 0.35, 0.28, 0.24); // C5
+    }
+
+    // 9. Ganho de Moeda / Estrela / XP Pop
+    function playCoin() {
+      if (!enabled) return;
+      initCtx();
+      playTone(987.77, 'sine', 0.08, 0.0, 0.16); // B5
+      playTone(1318.51, 'sine', 0.28, 0.07, 0.24); // E6
+    }
+
+    // 10. Perda de Vida / Coração quebrado
+    function playHeartLost() {
+      if (!enabled) return;
+      initCtx();
+      playTone(330, 'sawtooth', 0.08, 0.0, 0.12);
+      playTone(220, 'sine', 0.22, 0.06, 0.2);
+    }
+
+    function toggle() {
+      enabled = !enabled;
+      try {
+        localStorage.setItem('treina_detran_sound_enabled', enabled ? '1' : '0');
+      } catch (e) {}
+      if (enabled) {
+        initCtx();
+        playTone(659.25, 'sine', 0.08, 0.0, 0.2);
+        playTone(880.00, 'sine', 0.2, 0.09, 0.24);
+      }
+      return enabled;
+    }
+
+    function isEnabled() {
+      return enabled;
+    }
+
+    return {
+      initCtx,
+      playCorrect,
+      playWrong,
+      playStreak,
+      playClick,
+      playVictory,
+      playGameOver,
+      playGoal,
+      playEncourage,
+      playCoin,
+      playHeartLost,
+      toggle,
+      isEnabled
+    };
+  })();
 
   // ══ ESTADO GLOBAL ═══════════════════════════════════
   let state = {
@@ -89,6 +258,7 @@ const App = (() => {
     updateGreeting();
     updateThermometerHome();
     renderPegadinhas();
+    updateSoundIcons(Sound.isEnabled());
   }
 
   function checkDailyReset() {
@@ -164,7 +334,11 @@ const App = (() => {
       const card = document.createElement('div');
       card.className = 'module-card';
       if (card.style?.setProperty) card.style.setProperty('--mod-color', mod.color);
-      card.onclick = () => startModule(mod.id);
+      card.onclick = () => {
+        Sound.initCtx();
+        Sound.playClick();
+        startModule(mod.id);
+      };
 
       let badge = '';
       if (isWeak) badge = `<div class="module-badge" style="background:#FF4545;color:#fff">REVISAR</div>`;
@@ -210,6 +384,9 @@ const App = (() => {
 
   // ══ INICIAR TREINO / SIMULADO COM PRIORIZAÇÃO DE IMAGENS ══
   function startModule(moduleId) {
+    Sound.initCtx();
+    Sound.playClick();
+
     if (typeof MODULES === 'undefined' || typeof QUESTIONS === 'undefined') return;
     const mod = MODULES.find(m => m.id === moduleId);
     if (!mod || !QUESTIONS[moduleId]) return;
@@ -243,6 +420,9 @@ const App = (() => {
   }
 
   function startSimulado() {
+    Sound.initCtx();
+    Sound.playClick();
+
     if (typeof QUESTIONS === 'undefined') return;
 
     // Coleta questões de todos os módulos
@@ -378,6 +558,7 @@ const App = (() => {
   function selectAnswer(selectedIndex, q) {
     if (quizState.answered) return;
     quizState.answered = true;
+    Sound.initCtx();
 
     const isCorrect = selectedIndex === q.correct;
     const buttons = document.querySelectorAll('.option-btn');
@@ -390,6 +571,18 @@ const App = (() => {
     }
     if (!isCorrect && buttons[q.correct]) {
       buttons[q.correct].classList.add('correct');
+    }
+
+    // EFEITO SONORO GAMIFICADO!
+    if (isCorrect) {
+      if (quizState.sessionStreak >= 2) {
+        Sound.playStreak();
+      } else {
+        Sound.playCorrect();
+      }
+    } else {
+      Sound.playWrong();
+      setTimeout(() => Sound.playHeartLost(), 120);
     }
 
     // Identificação do módulo
@@ -442,6 +635,13 @@ const App = (() => {
     state.totalAnswered++;
     state.totalCorrect += isCorrect ? 1 : 0;
     state.dailyAnswered++;
+
+    // Celebração de Meta Diária Batida!
+    if (state.dailyAnswered === state.dailyGoal) {
+      setTimeout(() => {
+        Sound.playGoal();
+      }, 700);
+    }
 
     // Estatísticas por módulo
     if (mid && mid !== 'simulado') {
@@ -522,6 +722,7 @@ const App = (() => {
   }
 
   function nextQuestion() {
+    Sound.playClick();
     if (quizState.lives <= 0) {
       showGameOver();
       return;
@@ -543,6 +744,9 @@ const App = (() => {
   }
 
   function showXpPopup(xp, streak) {
+    setTimeout(() => {
+      Sound.playCoin();
+    }, 180);
     const popup = document.createElement('div');
     popup.className = 'xp-popup';
     popup.textContent = streak >= 3 ? `+${xp} XP 🔥` : `+${xp} XP`;
@@ -592,6 +796,13 @@ const App = (() => {
     const newStars = getModuleStars(pct);
     saveState();
 
+    // Fanfarra sonora se aprovada ou som de incentivo
+    if (pct >= 70) {
+      Sound.playVictory();
+    } else {
+      Sound.playEncourage();
+    }
+
     // Preenche estatísticas do resultado
     const rsCorrect = document.getElementById('rs-correct');
     if (rsCorrect) rsCorrect.textContent = correct;
@@ -634,13 +845,16 @@ const App = (() => {
     const resSub = document.getElementById('result-subtitle');
     if (resSub) resSub.textContent = subtitle;
 
-    // Estrelas animadas
+    // Estrelas animadas com som gamificado
     ['star1', 'star2', 'star3'].forEach((id, i) => {
       const el = document.getElementById(id);
       if (el) {
         el.className = 'star';
         if (i < newStars) {
-          setTimeout(() => el.classList.add('lit'), 300 + i * 250);
+          setTimeout(() => {
+            el.classList.add('lit');
+            Sound.playCoin();
+          }, 350 + i * 280);
         }
       }
     });
@@ -693,10 +907,12 @@ const App = (() => {
 
   // ══ GAME OVER E OVERLAYS ════════════════════════════
   function showGameOver() {
+    Sound.playGameOver();
     showOverlay('overlay-gameover');
   }
 
   function retryModule() {
+    Sound.playClick();
     hideAllOverlays();
     if (quizState.isSimulado) {
       startSimulado();
@@ -708,6 +924,7 @@ const App = (() => {
   }
 
   function exitQuiz() {
+    Sound.playClick();
     hideAllOverlays();
     showScreen('screen-home');
     renderModulesGrid();
@@ -715,6 +932,7 @@ const App = (() => {
   }
 
   function closeLevelUp() {
+    Sound.playClick();
     hideAllOverlays();
   }
 
@@ -786,7 +1004,10 @@ const App = (() => {
               <p>${pct}% de aproveitamento — recomendado treinar agora</p>
             </div>
           `;
-          item.onclick = () => startModule(mod.id);
+          item.onclick = () => {
+            Sound.playClick();
+            startModule(mod.id);
+          };
           weakList.appendChild(item);
         });
       }
@@ -859,6 +1080,7 @@ const App = (() => {
   }
 
   function clearHistory() {
+    Sound.playClick();
     if (confirm('Deseja limpar todo o histórico de treinos e respostas salvas?')) {
       state.sessionHistory = [];
       state.recentAnswers = [];
@@ -913,6 +1135,21 @@ const App = (() => {
     const text = document.getElementById('daily-progress-text');
     if (bar) bar.style.width = pct + '%';
     if (text) text.textContent = `${Math.min(state.dailyAnswered, state.dailyGoal)} / ${state.dailyGoal} questões`;
+  }
+
+  // ══ CONTROLE DE SOM ═════════════════════════════════
+  function toggleSound() {
+    const isSoundOn = Sound.toggle();
+    updateSoundIcons(isSoundOn);
+    if (isSoundOn) {
+      Sound.playClick();
+    }
+  }
+
+  function updateSoundIcons(isSoundOn) {
+    document.querySelectorAll('.sound-icon').forEach(el => {
+      el.textContent = isSoundOn ? '🔊' : '🔇';
+    });
   }
 
   // ══ PEGADINHAS DO DETRAN ════════════════════════════
@@ -985,6 +1222,8 @@ const App = (() => {
 
   // ══ NAVEGAÇÃO ENTRE TELAS E ABAS ════════════════════
   function showScreen(screenId) {
+    Sound.initCtx();
+    Sound.playClick();
     hideAllOverlays();
 
     document.querySelectorAll('.screen').forEach(s => {
@@ -1024,6 +1263,7 @@ const App = (() => {
   }
 
   function showTab(tab) {
+    Sound.playClick();
     if (tab === 'home') {
       showScreen('screen-home');
     } else if (tab === 'stats') {
@@ -1070,6 +1310,7 @@ const App = (() => {
     retryModule,
     closeLevelUp,
     clearHistory,
+    toggleSound,
   };
 })();
 
