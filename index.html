@@ -163,9 +163,6 @@
         <div class="question-number" id="question-number">Questão 1</div>
         <div class="question-tag" id="question-tag">Legislação</div>
         <p class="question-text" id="question-text">Carregando...</p>
-        <div class="question-img-wrap" id="question-img-wrap" style="display:none">
-          <img id="question-img" src="" alt="Imagem da questão" />
-        </div>
       </div>
 
       <div class="options-list" id="options-list"></div>
@@ -174,10 +171,15 @@
         <div class="feedback-icon" id="feedback-icon">✅</div>
         <div class="feedback-content">
           <p class="feedback-title" id="feedback-title">Correto!</p>
-          <p class="feedback-text" id="feedback-text"></p>
+          <div class="feedback-text" id="feedback-text"></div>
+          <!-- Imagem revelada após responder -->
+          <div class="feedback-img-wrap" id="feedback-img-wrap" style="display:none">
+            <span class="feedback-img-label">📸 Imagem de Referência da Resposta:</span>
+            <img id="feedback-img" src="" alt="Ilustração explicativa" />
+          </div>
         </div>
         <button class="btn-next" id="btn-next" onclick="App.nextQuestion()">
-          Próxima <span>→</span>
+          Próxima Questão <span>→</span>
         </button>
       </div>
     </div>
@@ -350,22 +352,6 @@
       <h3>Módulo Desbloqueado!</h3>
       <p id="levelup-text">Você completou este módulo!</p>
       <button class="btn-primary" onclick="App.closeLevelUp()">Continuar 🚀</button>
-    </div>
-  </div>
-
-  <!-- ══ OVERLAY: DESAFIO ══ -->
-  <div id="overlay-desafio" class="overlay" style="display:none">
-    <div class="overlay-card desafio-card">
-      <div class="overlay-icon">🎯</div>
-      <h3>Aceita o desafio?</h3>
-      <p>Quantas das <strong>52 questões</strong> você consegue acertar sem consultar nenhuma apostila?</p>
-      <div class="desafio-options">
-        <div class="desafio-opt" onclick="App.dismissDesafio()">Menos de 30</div>
-        <div class="desafio-opt" onclick="App.dismissDesafio()">Entre 30 e 40</div>
-        <div class="desafio-opt" onclick="App.dismissDesafio()">Entre 40 e 45</div>
-        <div class="desafio-opt highlight" onclick="App.dismissDesafio()">As 52! 💪</div>
-      </div>
-      <button class="btn-primary" onclick="App.startSimuladoFromDesafio()">Descobrir agora →</button>
     </div>
   </div>
 
