@@ -64,7 +64,7 @@ const QUESTIONS = {
       text: 'Qual a velocidade máxima permitida para automóveis em rodovias de pista dupla, de acordo com o CTB?',
       options: ['80 km/h', '100 km/h', '110 km/h', '120 km/h'],
       correct: 3,
-      explanation: 'Em rodovias de pista dupla, a velocidade máxima para automóveis é de 120 km/h, conforme o art. 61 do CTB. Em pista simples, o limite é de 100 km/h.'
+      explanation: '✅ Conforme o Art. 61 do CTB (atualizado pela Lei 14.071/20), onde não houver sinalização regulamentadora, a velocidade máxima nas rodovias de PISTA DUPLA é de 120 km/h para automóveis, camionetas, caminhonetes e motocicletas. Em rodovias de PISTA SIMPLES, o limite é de 100 km/h. ⚠️ Cuidado com a pegadinha de confundir pista simples com pista dupla!'
     },
     {
       id: 'leg02',
@@ -119,7 +119,7 @@ const QUESTIONS = {
         'O veículo que estiver em velocidade menor'
       ],
       correct: 2,
-      explanation: 'O art. 29 do CTB estabelece que, em interseções sem sinalização, o condutor deve dar preferência ao veículo que vier pela direita. Essa é a regra da "preferência da direita".'
+      explanation: '✅ Regra de Ouro do CTB (Art. 29, III, "c"): Em cruzamentos NÃO sinalizados, a preferência SEMPRE é do veículo que se aproxima pela DIREITA do condutor. Exceções onde a direita NÃO prevalece: 1) Rodovia (quem está na rodovia tem preferência); 2) Rotatória (quem já está circulando na rotatória tem preferência).'
     },
     {
       id: 'leg07',
@@ -211,7 +211,7 @@ const QUESTIONS = {
       text: 'A placa "PARE" (R-1) tem qual formato?',
       options: ['Circular', 'Triangular', 'Octogonal (8 lados)', 'Retangular'],
       correct: 2,
-      explanation: 'A placa PARE é a única placa de regulamentação com formato octogonal (8 lados), fundo vermelho e inscrição branca. Ela exige parada obrigatória antes da faixa de parada e preferência total ao cruzamento.'
+      explanation: '✅ A placa R-1 (Parada Obrigatória) é a ÚNICA placa de todo o trânsito brasileiro em formato OCTOGONAL (8 lados). O motivo técnico desse formato exclusivo é permitir que motoristas em sentido contrário a reconheçam mesmo vendo-a apenas de costas! Desobedecer a parada obrigatória é infração gravíssima (7 pontos).'
     },
     {
       id: 'plc04',
@@ -231,7 +231,7 @@ const QUESTIONS = {
       text: 'A placa "Dê a Preferência" (R-2) tem qual formato?',
       options: ['Circular com borda vermelha', 'Triangular com borda vermelha', 'Octogonal', 'Retangular azul'],
       correct: 1,
-      explanation: 'A placa "Dê a Preferência" (R-2) é triangular com bordas vermelhas e fundo branco — única placa de regulamentação com formato triangular. Indica que o motorista deve ceder a passagem ao tráfego na via preferencial.'
+      explanation: '✅ A placa R-2 (Dê a Preferência) é a ÚNICA placa de regulamentação com formato TRIANGULAR (com vértice apontando para baixo). Assim como a placa PARE, seu formato único serve para identificação imediata até mesmo vista de trás. Não exige parada total se não houver veículos na via preferencial, mas exige redução de velocidade e preferência absoluta aos outros.'
     },
     {
       id: 'plc06',
@@ -362,10 +362,10 @@ const QUESTIONS = {
     },
     {
       id: 'inf05',
-      text: 'Não usar cinto de segurança é infração de que tipo?',
-      options: ['Leve', 'Média', 'Grave', 'Gravíssima'],
-      correct: 3,
-      explanation: 'Não usar cinto de segurança é infração GRAVÍSSIMA (7 pontos). A responsabilidade é do motorista, que responde pela ausência do cinto tanto para si mesmo quanto para todos os passageiros do veículo.'
+      text: 'Deixar o condutor ou passageiro de usar o cinto de segurança é infração de qual natureza?',
+      options: ['Leve (3 pontos)', 'Média (4 pontos)', 'Grave (5 pontos)', 'Gravíssima (7 pontos)'],
+      correct: 2,
+      explanation: '✅ Resposta correta: GRAVE (5 pontos). Conforme o Art. 167 do CTB, deixar de usar o cinto de segurança é infração GRAVE, sujeita a multa de R$ 195,23 e retenção do veículo até a colocação do cinto. ⚠️ ATENÇÃO À PEGADINHA: Muitos candidatos erram marcando "Gravíssima" por achar que envolve risco de vida, mas a classificação legal do CTB é expressamente GRAVE.'
     },
     {
       id: 'inf06',
@@ -407,15 +407,15 @@ const QUESTIONS = {
     },
     {
       id: 'inf10',
-      text: 'Dirigir com CNH vencida (prazo de validade expirado) é:',
+      text: 'Dirigir veículo com a Carteira Nacional de Habilitação (CNH) vencida há mais de 30 dias é:',
       options: [
-        'Apenas uma irregularidade administrativa sem multa',
-        'Infração leve',
-        'Infração gravíssima equivalente a dirigir sem habilitação',
-        'Permitido por até 30 dias após o vencimento'
+        'Apenas uma irregularidade administrativa sem pontuação',
+        'Infração média com advertência por escrito',
+        'Infração gravíssima com multa, recolhimento da CNH e retenção do veículo',
+        'Infração leve com prazo de mais 30 dias para regularizar'
       ],
       correct: 2,
-      explanation: 'Dirigir com CNH vencida é tratado como infração gravíssima, pois é equivalente a dirigir sem habilitação. O veículo é recolhido e o condutor é multado. A renovação deve ser feita antes do vencimento.'
+      explanation: '✅ Resposta correta: Infração GRAVÍSSIMA (Art. 162, V do CTB). Dirigir com a CNH vencida há MAIS de 30 dias gera 7 pontos na carteira, multa de R$ 293,47, recolhimento do documento e retenção do veículo até a apresentação de condutor habilitado. ⚠️ PEGADINHA: Nos primeiros 30 dias corridos após o vencimento, ainda é tolerado dirigir sem multa para que você faça a renovação.'
     }
   ],
 
@@ -443,7 +443,7 @@ const QUESTIONS = {
         'Ligar o freio de mão para reduzir a velocidade rapidamente'
       ],
       correct: 2,
-      explanation: 'Na aquaplanagem, o pneu flutua sobre uma camada de água. A ação correta é soltar o acelerador suavemente, manter o volante firme na direção desejada e aguardar o pneu retomar o contato com o solo. Frear ou girar bruscamente pode causar perda total do controle.'
+      explanation: '✅ Regra Máxima de Direção Defensiva: Na aquaplanagem (pneu perde o contato com o asfalto devido à lâmina de água), NUNCA pise no freio e NUNCA gire o volante bruscamente! A atitude correta é: 1) Tirar suavemente o pé do acelerador; 2) Manter o volante reto e firme; 3) Aguardar o peso do carro romper a lâmina de água e recuperar a aderência. Frear bruscamente trava as rodas e causa capotamento imediato.'
     },
     {
       id: 'dir03',
