@@ -1,7 +1,9 @@
 /**
- * TreinaDETRAN — data.js
+ * DetranQuiz — data.js
+ * Método Gabarita Detran
  * Banco de questões organizado por módulo
  * Baseado nos temas mais cobrados no DETRAN 2025/2026
+ * Total: 60 questões → Simulado usa 52
  */
 
 const MODULES = [
@@ -720,4 +722,13 @@ const QUESTIONS = {
 };
 
 // Questões para Simulado Final (mistura de todos os módulos)
-const SIMULADO_QUESTIONS_COUNT = 30;
+// 52 questões = termômetro do Método Gabarita Detran
+const SIMULADO_QUESTIONS_COUNT = 52;
+
+// Metas do termômetro (baseado no copy)
+const THERMOMETER = [
+  { threshold: 30, label: '30/52', pct: '~60%', message: 'Você está na média. Não pare!' },
+  { threshold: 40, label: '40/52', pct: '~80%', message: 'Ótimo! Quase aprovado com folga.' },
+  { threshold: 45, label: '45/52', pct: '~95%', message: 'Excelente! Praticamente gabaritando.' },
+  { threshold: 52, label: '52/52', pct: '100%', message: 'GABARITOU! Você está mais do que pronto!' },
+];
