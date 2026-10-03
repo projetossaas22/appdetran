@@ -18,30 +18,32 @@
 </head>
 <body>
 
-  <!-- ══ TELA 1: SPLASH / HERO ══ -->
+  <!-- ══ TELA 1: SPLASH / BOAS-VINDAS ══ -->
   <div id="screen-splash" class="screen active">
     <div class="splash-bg">
+      <img class="splash-bg-img" src="images/banners/01-estrada-neon.png" alt="Treino DETRAN" />
+      <div class="splash-gradient-overlay"></div>
       <div class="road-lines"></div>
       <div class="particles" id="particles"></div>
-      <!-- Banner background do Batch 4 -->
-      <img class="splash-bg-img" src="images/banners/01-estrada-neon.png" alt="" aria-hidden="true" />
     </div>
 
     <div class="splash-content">
-      <div class="splash-brand">Método Gabarita Detran</div>
+      <div class="vip-badge">
+        <span>⭐</span> ÁREA DE MEMBROS • ACESSO LIBERADO
+      </div>
       <div class="logo-badge">🚗</div>
       <h1 class="splash-title">DetranQuiz</h1>
-      <p class="splash-tagline">Não estude para a prova.<br/><strong>TREINE para ela.</strong></p>
-      <p class="splash-sub">Quiz interativo com as questões mais cobradas na prova do DETRAN. Responda, descubra onde erra e chegue aprovada.</p>
+      <p class="splash-tagline">Bem-vinda(o) ao seu <strong>Treinador Oficial</strong></p>
+      <p class="splash-sub">Seu acesso ao Método Gabarita Detran está 100% ativo. Treine com as questões reais da banca, domine as pegadinhas e chegue pronta para passar de primeira!</p>
       <button class="btn-primary btn-xl pulse" id="btn-start" onclick="App.showScreen('screen-home')">
-        Começar Agora — Grátis 🚀
+        Entrar no Treinamento 🚀
       </button>
     </div>
 
     <div class="splash-stats">
-      <div class="stat-item"><span class="stat-number">52</span><span class="stat-label">Questões no quiz</span></div>
-      <div class="stat-item"><span class="stat-number">70%</span><span class="stat-label">Para passar</span></div>
-      <div class="stat-item"><span class="stat-number">6</span><span class="stat-label">Módulos de treino</span></div>
+      <div class="stat-item"><span class="stat-number">52</span><span class="stat-label">Simulado Oficial</span></div>
+      <div class="stat-item"><span class="stat-number">6</span><span class="stat-label">Módulos de Treino</span></div>
+      <div class="stat-item"><span class="stat-number">100%</span><span class="stat-label">Acesso Vitalício</span></div>
     </div>
   </div>
 
@@ -235,14 +237,12 @@
         <div id="wrong-list"></div>
       </div>
 
-      <!-- CTA de compra se ainda não comprou -->
-      <div class="buy-cta" id="buy-cta">
-        <div class="buy-cta-text">
-          <strong>Acesse simulados completos, pegadinhas comentadas e materiais de revisão</strong>
+      <!-- Dica do Treinador -->
+      <div class="coach-tip-card">
+        <div class="coach-tip-icon">💡</div>
+        <div class="coach-tip-text">
+          <strong>Dica do Treinador:</strong> Revise com calma as questões erradas acima antes de iniciar uma nova tentativa. Treinar a falha é o que garante o gabarito na prova oficial!
         </div>
-        <a href="https://wa.me" class="btn-whatsapp" id="btn-whatsapp" target="_blank">
-          💬 Quero o Método Gabarita Detran — R$ 20
-        </a>
       </div>
 
       <div class="result-actions">
@@ -290,14 +290,12 @@
       <h3 class="section-title">🎯 Pontos Fracos — Foque Aqui!</h3>
       <div class="weak-areas-list" id="weak-areas-list"></div>
 
-      <div class="buy-cta" style="margin-top:8px">
-        <div class="buy-cta-text">
-          <strong>Quer simulados, pegadinhas e materiais organizados por assunto?</strong>
-        </div>
-        <a href="https://wa.me" class="btn-whatsapp" target="_blank">
-          💬 Método Gabarita Detran — R$ 20
-        </a>
+      <!-- Histórico de Treinos e Respostas -->
+      <div class="history-section-header">
+        <h3 class="section-title">🕒 Histórico de Treinos & Respostas</h3>
+        <button class="btn-clear-history" onclick="App.clearHistory()">Limpar</button>
       </div>
+      <div class="history-list" id="history-list"></div>
     </div>
     <nav class="bottom-nav">
       <button class="nav-btn" onclick="App.showTab('home')"><span>🏠</span><span>Início</span></button>
@@ -320,13 +318,11 @@
       </div>
       <div class="peg-list" id="peg-list"></div>
 
-      <div class="buy-cta" style="margin-top:8px">
-        <div class="buy-cta-text">
-          <strong>Mais de 20 pegadinhas comentadas com explicação completa estão no Método Gabarita Detran</strong>
+      <div class="coach-tip-card" style="margin-top:8px">
+        <div class="coach-tip-icon">🎯</div>
+        <div class="coach-tip-text">
+          <strong>Dica de Ouro:</strong> Pegadinhas do DETRAN costumam usar palavras absolutas como <em>"nunca"</em>, <em>"sempre"</em> ou <em>"apenas"</em>. Se vir esses termos na sua prova, desconfie e releia com atenção!
         </div>
-        <a href="https://wa.me" class="btn-whatsapp" target="_blank">
-          💬 Quero todas as pegadinhas — R$ 20
-        </a>
       </div>
     </div>
     <nav class="bottom-nav">
